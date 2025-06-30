@@ -1,0 +1,166 @@
+/* Spacing Utilities */
+.space-y-0 > * + * {
+  margin-top: 0;
+}
+
+.space-y-1 > * + * {
+  margin-top: 0.25rem;
+}
+
+.space-y-2 > * + * {
+  margin-top: 0.5rem;
+}
+
+.space-y-3 > * + * {
+  margin-top: 0.75rem;
+}
+
+.space-y-4 > * + * {
+  margin-top: 1rem;
+}
+
+.space-y-5 > * + * {
+  margin-top: 1.25rem;
+}
+
+.space-y-6 > * + * {
+  margin-top: 1.5rem;
+}
+
+.space-y-8 > * + * {
+  margin-top: 2rem;
+}
+
+/* Aspect Ratios */
+.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
+.aspect-video {
+  aspect-ratio: 16 / 9;
+}
+
+.aspect-poster {
+  aspect-ratio: 2 / 3;
+}
+
+/* Text Utilities */
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Focus Utilities */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900;
+}
+
+/* Glass Effect */
+.glass {
+  @apply bg-slate-800/50 backdrop-blur-lg;
+}
+
+/* Gradient Backgrounds */
+.gradient-primary {
+  @apply bg-gradient-to-r from-indigo-600 to-purple-600;
+}
+
+.gradient-secondary {
+  @apply bg-gradient-to-r from-pink-600 to-rose-600;
+}
+
+.gradient-dark {
+  @apply bg-gradient-to-b from-slate-800 to-slate-900;
+}
+
+/* Shadow Utilities */
+.shadow-glow {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+}
+
+.shadow-glow-pink {
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
+}
+
+/* Border Utilities */
+.border-gradient {
+  border-image: linear-gradient(to right, #6366f1, #ec4899) 1;
+}
+
+/* Overlay Utilities */
+.overlay-dark {
+  @apply absolute inset-0 bg-black/60;
+}
+
+.overlay-gradient {
+  @apply absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent;
+}
+
+/* Z-Index Scale */
+.z-dropdown: 1000;
+.z-modal: 1050;
+.z-popover: 1100;
+.z-tooltip: 1150;
+
+/* Print Utilities */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Screen Reader Utilities */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.not-sr-only {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Responsive Utilities */
+@media (max-width: 640px) {
+  .mobile-full {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Dark Mode Utilities */
+.dark-mode-toggle {
+  @apply bg-slate-700 p-2 rounded-lg hover:bg-slate-600 transition-colors;
+}
+
+/* Performance Utilities */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.reduce-motion {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
