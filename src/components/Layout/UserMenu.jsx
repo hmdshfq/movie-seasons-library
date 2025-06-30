@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { User, LogOut, Users, Settings, ChevronDown } from "lucide-react";
 
@@ -6,7 +7,7 @@ export default function UserMenu() {
   const { profile, profiles, switchProfile, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
-  const router = useRouter();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -74,7 +75,7 @@ export default function UserMenu() {
           <div className="py-2">
             <button
               onClick={() => {
-                router.push("/auth/profiles");
+                navigate("/auth/profiles");
                 setIsOpen(false);
               }}
               className="w-full flex items-center gap-3 px-4 py-2 hover:bg-slate-700 transition-colors">
@@ -84,7 +85,7 @@ export default function UserMenu() {
 
             <button
               onClick={() => {
-                router.push("/settings");
+                navigate("/settings");
                 setIsOpen(false);
               }}
               className="w-full flex items-center gap-3 px-4 py-2 hover:bg-slate-700 transition-colors">
