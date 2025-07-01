@@ -30,6 +30,10 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
   }, [debouncedSearch]);
 
   const applyFilters = async () => {
+    // Clear search query when applying filters
+    if (searchQuery.trim()) {
+      setSearchQuery("");
+    }
     announce("Searching for movies...");
     const results = await discoverMovies(filters);
     announce(`Found ${results.length} results`);
@@ -58,9 +62,9 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Apply filters when they change
+  // Apply filters when they change (only if not searching)
   useEffect(() => {
-    if (!searchQuery) {
+    if (!searchQuery.trim()) {
       applyFilters();
     }
   }, [filters]);
@@ -68,7 +72,8 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
   return (
     <section
       className="animate-fadeIn"
-      aria-label="Discover movies and TV shows">
+      aria-label="Discover movies and TV shows"
+    >
       <div className="bg-slate-800 rounded-2xl p-6 mb-8 shadow-2xl">
         <h2 className="text-2xl font-bold mb-6">Search & Discover</h2>
 
@@ -100,7 +105,8 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
             <button
               onClick={() => setSearchQuery("")}
               className="mt-2 text-sm text-gray-400 hover:text-white transition-colors"
-              aria-label="Clear search query">
+              aria-label="Clear search query"
+            >
               Clear search
             </button>
           )}
@@ -113,7 +119,8 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
             <div>
               <label
                 htmlFor="media-type"
-                className="block text-sm font-medium text-gray-400 mb-2">
+                className="block text-sm font-medium text-gray-400 mb-2"
+              >
                 Type
               </label>
               <select
@@ -122,7 +129,8 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
                 onChange={(e) =>
                   handleFilterChange("mediaType", e.target.value)
                 }
-                className="w-full px-4 py-2 bg-slate-700 rounded-lg border-2 border-transparent focus:border-indigo-500 focus:outline-none transition-all">
+                className="w-full px-4 py-2 bg-slate-700 rounded-lg border-2 border-transparent focus:border-indigo-500 focus:outline-none transition-all"
+              >
                 <option value="movie">Movies</option>
                 <option value="tv">TV Shows</option>
               </select>
@@ -131,14 +139,16 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
             <div>
               <label
                 htmlFor="genre-select"
-                className="block text-sm font-medium text-gray-400 mb-2">
+                className="block text-sm font-medium text-gray-400 mb-2"
+              >
                 Genre
               </label>
               <select
                 id="genre-select"
                 value={filters.genre}
                 onChange={(e) => handleFilterChange("genre", e.target.value)}
-                className="w-full px-4 py-2 bg-slate-700 rounded-lg border-2 border-transparent focus:border-indigo-500 focus:outline-none transition-all">
+                className="w-full px-4 py-2 bg-slate-700 rounded-lg border-2 border-transparent focus:border-indigo-500 focus:outline-none transition-all"
+              >
                 {GENRES.map((g) => (
                   <option key={g.id} value={g.id}>
                     {g.name}
@@ -150,14 +160,16 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
             <div>
               <label
                 htmlFor="year-select"
-                className="block text-sm font-medium text-gray-400 mb-2">
+                className="block text-sm font-medium text-gray-400 mb-2"
+              >
                 Year
               </label>
               <select
                 id="year-select"
                 value={filters.year}
                 onChange={(e) => handleFilterChange("year", e.target.value)}
-                className="w-full px-4 py-2 bg-slate-700 rounded-lg border-2 border-transparent focus:border-indigo-500 focus:outline-none transition-all">
+                className="w-full px-4 py-2 bg-slate-700 rounded-lg border-2 border-transparent focus:border-indigo-500 focus:outline-none transition-all"
+              >
                 {YEARS.map((y) => (
                   <option key={y.value} value={y.value}>
                     {y.label}
@@ -169,14 +181,16 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
             <div>
               <label
                 htmlFor="sort-select"
-                className="block text-sm font-medium text-gray-400 mb-2">
+                className="block text-sm font-medium text-gray-400 mb-2"
+              >
                 Sort By
               </label>
               <select
                 id="sort-select"
                 value={filters.sortBy}
                 onChange={(e) => handleFilterChange("sortBy", e.target.value)}
-                className="w-full px-4 py-2 bg-slate-700 rounded-lg border-2 border-transparent focus:border-indigo-500 focus:outline-none transition-all">
+                className="w-full px-4 py-2 bg-slate-700 rounded-lg border-2 border-transparent focus:border-indigo-500 focus:outline-none transition-all"
+              >
                 {SORT_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -188,7 +202,8 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
             <div>
               <label
                 htmlFor="rating-slider"
-                className="block text-sm font-medium text-gray-400 mb-2">
+                className="block text-sm font-medium text-gray-400 mb-2"
+              >
                 Min Rating: {filters.minRating}
               </label>
               <input
@@ -212,14 +227,16 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
               onClick={applyFilters}
               variant="primary"
               icon={Search}
-              aria-label="Apply filters to search">
+              aria-label="Apply filters to search"
+            >
               Apply Filters
             </Button>
             <Button
               onClick={handleRandomPick}
               variant="secondary"
               icon={Shuffle}
-              aria-label="Get random movie suggestion">
+              aria-label="Get random movie suggestion"
+            >
               Random Pick
             </Button>
           </div>
