@@ -13,11 +13,17 @@ import Profiles from "./pages/Profiles";
 import Home from "./pages/Home";
 import Library from "./pages/Library";
 import Recommendations from "./pages/Recommendations";
+
 import "./index.css";
 
 function App() {
   return (
-    <Router>
+    <Router
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
       <AuthProvider>
         <Routes>
           {/* Auth Routes */}

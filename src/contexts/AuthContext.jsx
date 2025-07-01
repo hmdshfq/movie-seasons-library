@@ -14,56 +14,113 @@ export function AuthProvider({ children }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check active sessions and sets the user
-    const getSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await fetchProfiles(session.user.id);
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        // Get current session
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error("Auth session error:", error);
+          if (mounted) {
+            setUser(null);
+            setLoading(false);
+          }
+          return;
+        }
+
+        if (mounted) {
+          setUser(session?.user || null);
+
+          // If user exists, fetch profiles
+          if (session?.user) {
+            await fetchProfiles(session.user.id);
+          }
+
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+        if (mounted) {
+          setUser(null);
+          setLoading(false);
+        }
       }
-      setLoading(false);
     };
 
-    getSession();
+    // Set up auth state listener
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return;
 
-    // Listen for changes on auth state
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user ?? null);
+      if (event === "SIGNED_OUT") {
+        setUser(null);
+        setProfile(null);
+        setProfiles([]);
+        return;
+      }
+
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        setUser(session?.user || null);
+
         if (session?.user) {
-          await fetchProfiles(session.user.id);
+          fetchProfiles(session.user.id).catch(console.error);
         } else {
           setProfiles([]);
           setProfile(null);
         }
       }
-    );
+    });
+
+    // Initialize auth
+    initializeAuth();
 
     return () => {
-      authListener.subscription.unsubscribe();
+      mounted = false;
+      subscription.unsubscribe();
     };
   }, []);
 
   const fetchProfiles = async (userId) => {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: true });
 
-    if (data && data.length > 0) {
-      setProfiles(data);
-      // Check for saved profile preference
-      const savedProfileId = localStorage.getItem("activeProfileId");
-      const savedProfile = data.find((p) => p.id === savedProfileId);
-
-      if (savedProfile) {
-        setProfile(savedProfile);
-      } else if (!profile) {
-        setProfile(data[0]);
+      if (error) {
+        console.warn("Profile fetch error:", error.message);
+        setProfiles([]);
+        setProfile(null);
+        return;
       }
+
+      if (data && data.length > 0) {
+        setProfiles(data);
+
+        // Check for saved profile preference
+        const savedProfileId = localStorage.getItem("activeProfileId");
+        const savedProfile = data.find((p) => p.id === savedProfileId);
+
+        if (savedProfile) {
+          setProfile(savedProfile);
+        } else {
+          setProfile(data[0]);
+        }
+      } else {
+        setProfiles([]);
+        setProfile(null);
+      }
+    } catch (error) {
+      console.warn("fetchProfiles error:", error.message);
+      setProfiles([]);
+      setProfile(null);
     }
   };
 
@@ -96,6 +153,13 @@ export function AuthProvider({ children }) {
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
+
+    // Clear local state
+    setUser(null);
+    setProfile(null);
+    setProfiles([]);
+    localStorage.removeItem("activeProfileId");
+
     navigate("/login");
   };
 
@@ -103,7 +167,7 @@ export function AuthProvider({ children }) {
     userId,
     name,
     isKids = false,
-    avatarUrl = null
+    avatarUrl = null,
   ) => {
     const profileData = {
       user_id: userId || user.id,
@@ -112,7 +176,7 @@ export function AuthProvider({ children }) {
       avatar_url:
         avatarUrl ||
         `https://ui-avatars.com/api/?name=${encodeURIComponent(
-          name
+          name,
         )}&background=random`,
     };
 
@@ -124,7 +188,7 @@ export function AuthProvider({ children }) {
 
     if (error) throw error;
 
-    setProfiles([...profiles, data]);
+    setProfiles((prev) => [...prev, data]);
     return data;
   };
 
@@ -146,7 +210,7 @@ export function AuthProvider({ children }) {
     signOut,
     createProfile,
     switchProfile,
-    fetchProfiles,
+    fetchProfiles: (userId) => fetchProfiles(userId),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
