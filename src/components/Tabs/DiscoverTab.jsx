@@ -6,6 +6,7 @@ import MovieGrid from "../MovieGrid/MovieGrid";
 import LoadingSpinner from "../UI/LoadingSpinner";
 import Button from "../UI/Button";
 import RatingSlider from "../UI/RatingSlider";
+import MediaTypeToggle from "../UI/MediaTypeToggle";
 import { GENRES, YEARS, SORT_OPTIONS } from "../../utils/constants";
 
 export default function DiscoverTab({ announce, showMovieDetails }) {
@@ -142,23 +143,10 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
           <h3 className="text-lg font-semibold mb-4">Filters</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <div>
-              <label
-                htmlFor="media-type"
-                className="block text-sm font-medium text-gray-400 mb-2"
-              >
-                Type
-              </label>
-              <select
-                id="media-type"
+              <MediaTypeToggle
                 value={filters.mediaType}
-                onChange={(e) =>
-                  handleFilterChange("mediaType", e.target.value)
-                }
-                className="w-full px-4 py-2 bg-slate-700 rounded-lg border-2 border-transparent focus:border-indigo-500 focus:outline-none transition-all"
-              >
-                <option value="movie">Movies</option>
-                <option value="tv">TV Shows</option>
-              </select>
+                onChange={(val) => handleFilterChange("mediaType", val)}
+              />
             </div>
 
             <div>
