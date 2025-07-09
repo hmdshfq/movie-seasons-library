@@ -40,22 +40,42 @@ export default function RecommendationsTab({ showMovieDetails, announce }) {
 
     try {
       const watched = await movieService.getWatchedMovies(profile.id);
-      const recentMovies = watched.slice(-5);
       const recommendationSet = new Set();
+      const targetCount = 20;
 
-      for (const movie of recentMovies) {
-        const recs = await tmdbService.getRecommendations(movie.movie_id);
-        recs.slice(0, 4).forEach((rec) => {
-          recommendationSet.add(JSON.stringify(rec));
-        });
+      // Start with more recent movies and get more recommendations per movie
+      let movieIndex = 0;
+      let recsPerMovie = 6; // Increased from 4 to 6
+
+      while (
+        recommendationSet.size < targetCount &&
+        movieIndex < watched.length
+      ) {
+        const moviesToProcess = watched.slice(
+          -Math.min(8 + movieIndex, watched.length),
+          watched.length - movieIndex,
+        );
+
+        for (const movie of moviesToProcess) {
+          if (recommendationSet.size >= targetCount) break;
+
+          const recs = await tmdbService.getRecommendations(movie.movie_id);
+          recs.slice(0, recsPerMovie).forEach((rec) => {
+            recommendationSet.add(JSON.stringify(rec));
+          });
+        }
+
+        movieIndex += moviesToProcess.length;
+        recsPerMovie = Math.min(recsPerMovie + 2, 10); // Increase recommendations per movie if needed
       }
 
-      const uniqueRecommendations = Array.from(recommendationSet).map((r) =>
-        JSON.parse(r)
-      );
+      const uniqueRecommendations = Array.from(recommendationSet)
+        .map((r) => JSON.parse(r))
+        .slice(0, targetCount); // Ensure exactly 20 recommendations
+
       setRecommendations(uniqueRecommendations);
       announce(
-        `Found ${uniqueRecommendations.length} recommendations based on your library`
+        `Found ${uniqueRecommendations.length} recommendations based on your library`,
       );
     } catch (error) {
       console.error("Error getting recommendations:", error);
@@ -69,7 +89,8 @@ export default function RecommendationsTab({ showMovieDetails, announce }) {
     return (
       <section
         className="animate-fadeIn"
-        aria-label="Personalized recommendations">
+        aria-label="Personalized recommendations"
+      >
         <div className="bg-slate-800 rounded-2xl p-6 mb-8 shadow-2xl text-center">
           <Sparkles size={64} className="mx-auto text-indigo-400 mb-4" />
           <h2 className="text-2xl font-bold mb-4">
@@ -87,7 +108,8 @@ export default function RecommendationsTab({ showMovieDetails, announce }) {
   return (
     <section
       className="animate-fadeIn"
-      aria-label="Personalized recommendations">
+      aria-label="Personalized recommendations"
+    >
       <div className="bg-slate-800 rounded-2xl p-6 mb-8 shadow-2xl">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold">Recommended For You</h2>
@@ -96,7 +118,8 @@ export default function RecommendationsTab({ showMovieDetails, announce }) {
             variant="secondary"
             icon={RefreshCw}
             disabled={loading}
-            aria-label="Refresh recommendations">
+            aria-label="Refresh recommendations"
+          >
             Refresh
           </Button>
         </div>
