@@ -10,8 +10,15 @@ export const tmdbService = {
     return tmdb.getTVShow(tvId);
   },
 
-  async searchMovies(query, isKidsProfile = false) {
-    const results = await tmdb.searchMovies(query);
+  async searchMovies(params, isKidsProfile = false) {
+    const { query, mediaType } = params;
+
+    let results;
+    if (mediaType === "tv") {
+      results = await tmdb.searchTVShows(query);
+    } else {
+      results = await tmdb.searchMovies(query);
+    }
 
     if (isKidsProfile) {
       return filterKidsContent(results.results);
@@ -146,6 +153,56 @@ export const tmdbService = {
 
   async getGenres(type = "movie") {
     return type === "movie" ? tmdb.getMovieGenres() : tmdb.getTVGenres();
+  },
+
+  async getRandomMovie(mediaType = "movie", isKidsProfile = false) {
+    try {
+      // Generate a random page number between 1 and 10 to get variety
+      const randomPage = Math.floor(Math.random() * 10) + 1;
+
+      let results;
+
+      if (mediaType === "tv") {
+        // Use discover TV shows
+        const params = {
+          sort_by: "popularity.desc",
+          page: randomPage,
+          "vote_count.gte": 50, // Ensure we get movies with some ratings
+        };
+
+        if (isKidsProfile) {
+          params.with_genres = KIDS_SAFE_GENRES.join(",");
+        }
+
+        results = await tmdb.discoverTVShows(params);
+      } else {
+        // Use discover movies
+        const params = {
+          sort_by: "popularity.desc",
+          page: randomPage,
+          "vote_count.gte": 50, // Ensure we get movies with some ratings
+        };
+
+        if (isKidsProfile) {
+          params.with_genres = KIDS_SAFE_GENRES.join(",");
+          params.certification_country = "US";
+          params["certification.lte"] = "PG-13";
+        }
+
+        results = await tmdb.discoverMovies(params);
+      }
+
+      if (results.results && results.results.length > 0) {
+        // Pick a random movie from the results
+        const randomIndex = Math.floor(Math.random() * results.results.length);
+        return results.results[randomIndex];
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error getting random movie:", error);
+      throw error;
+    }
   },
 };
 

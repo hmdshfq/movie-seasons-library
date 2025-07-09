@@ -1,14 +1,17 @@
 import { useState } from "react";
 import { tmdbService } from "../services/tmdb.service";
+import { useAuth } from "../contexts/AuthContext";
 
 export function useMovies() {
+  const { profile } = useAuth();
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const discoverMovies = async (filters) => {
     setLoading(true);
     try {
-      const results = await tmdbService.discoverMovies(filters);
+      const isKidsProfile = profile?.is_kids || false;
+      const results = await tmdbService.discoverMovies(filters, isKidsProfile);
       setMovies(results);
       return results;
     } catch (error) {
@@ -25,7 +28,11 @@ export function useMovies() {
 
     setLoading(true);
     try {
-      const results = await tmdbService.searchMovies({ query, mediaType });
+      const isKidsProfile = profile?.is_kids || false;
+      const results = await tmdbService.searchMovies(
+        { query, mediaType },
+        isKidsProfile,
+      );
       setMovies(results);
       return results;
     } catch (error) {
@@ -40,7 +47,8 @@ export function useMovies() {
   const getRandomMovie = async (mediaType) => {
     setLoading(true);
     try {
-      const movie = await tmdbService.getRandomMovie(mediaType);
+      const isKidsProfile = profile?.is_kids || false;
+      const movie = await tmdbService.getRandomMovie(mediaType, isKidsProfile);
       if (movie) {
         setMovies([movie]);
         return movie;
