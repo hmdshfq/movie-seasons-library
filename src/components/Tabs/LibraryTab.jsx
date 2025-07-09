@@ -63,7 +63,8 @@ export default function LibraryTab({ showMovieDetails }) {
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             className="px-4 py-2 bg-slate-700 rounded-lg border-2 border-transparent focus:border-indigo-500 focus:outline-none transition-all"
-            aria-label="Sort library by">
+            aria-label="Sort library by"
+          >
             <option value="watched_at">Recently Watched</option>
             <option value="title">Title</option>
             <option value="rating">Rating</option>
@@ -93,13 +94,14 @@ export default function LibraryTab({ showMovieDetails }) {
                   }
                   tabIndex={0}
                   role="button"
-                  aria-label={`View details for ${movie.title}`}>
+                  aria-label={`View details for ${movie.title}`}
+                >
                   <div className="aspect-[2/3] relative overflow-hidden rounded-lg">
                     <img
                       src={
                         movie.poster_path
                           ? IMG_BASE_URL + movie.poster_path
-                          : "https://via.placeholder.com/200x300"
+                          : "https://placehold.co/200x300"
                       }
                       alt={`${movie.title} poster`}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
@@ -113,7 +115,8 @@ export default function LibraryTab({ showMovieDetails }) {
                       removeFromLibrary(movie.movie_id);
                     }}
                     className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
-                    aria-label={`Remove ${movie.title} from library`}>
+                    aria-label={`Remove ${movie.title} from library`}
+                  >
                     <X size={16} />
                   </button>
                 </div>

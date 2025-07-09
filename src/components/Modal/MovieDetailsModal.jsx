@@ -30,7 +30,7 @@ export default function MovieDetailsModal({
       // Focus trap
       if (e.key === "Tab" && modalRef.current) {
         const focusableElements = modalRef.current.querySelectorAll(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
         );
         const firstElement = focusableElements[0];
         const lastElement = focusableElements[focusableElements.length - 1];
@@ -57,11 +57,13 @@ export default function MovieDetailsModal({
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-labelledby="modal-title">
+      aria-labelledby="modal-title"
+    >
       <div
         ref={modalRef}
-        className="bg-slate-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
-        onClick={(e) => e.stopPropagation()}>
+        className="bg-slate-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header with backdrop */}
         <div className="relative h-64 md:h-96">
           <img
@@ -69,8 +71,8 @@ export default function MovieDetailsModal({
               movie.backdrop_path
                 ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
                 : movie.poster_path
-                ? IMG_BASE_URL + movie.poster_path
-                : "https://via.placeholder.com/1280x720"
+                  ? IMG_BASE_URL + movie.poster_path
+                  : "https://placehold.co/1280x720"
             }
             alt={`${movie.title || movie.name} backdrop`}
             className="w-full h-full object-cover"
@@ -81,13 +83,14 @@ export default function MovieDetailsModal({
             ref={closeRef}
             onClick={onClose}
             className="absolute top-4 right-4 p-2 bg-slate-900/80 rounded-full text-white hover:bg-slate-900 transition-colors"
-            aria-label="Close movie details">
+            aria-label="Close movie details"
+          >
             <X size={24} />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 md:p-8">
+        <div className="p-6 md:p-8 overflow-y-auto flex-1">
           <div className="flex flex-col md:flex-row gap-6">
             {/* Poster */}
             <div className="flex-shrink-0">
@@ -95,10 +98,10 @@ export default function MovieDetailsModal({
                 src={
                   movie.poster_path
                     ? IMG_BASE_URL + movie.poster_path
-                    : "https://via.placeholder.com/300x450"
+                    : "https://placehold.co/300x450"
                 }
                 alt={`${movie.title || movie.name} poster`}
-                className="w-48 h-72 object-cover rounded-lg shadow-2xl -mt-32 md:-mt-48"
+                className="w-48 h-72 object-cover rounded-lg shadow-2xl"
               />
             </div>
 
@@ -156,7 +159,8 @@ export default function MovieDetailsModal({
                     {movie.genres.map((genre) => (
                       <span
                         key={genre.id}
-                        className="bg-indigo-600/20 border border-indigo-600/50 px-3 py-1 rounded-full text-sm text-indigo-300">
+                        className="bg-indigo-600/20 border border-indigo-600/50 px-3 py-1 rounded-full text-sm text-indigo-300"
+                      >
                         {genre.name}
                       </span>
                     ))}
@@ -168,7 +172,8 @@ export default function MovieDetailsModal({
                 <Button
                   onClick={() => onToggleWatched(movie)}
                   variant={isWatched(movie.id) ? "secondary" : "primary"}
-                  icon={isWatched(movie.id) ? Check : Plus}>
+                  icon={isWatched(movie.id) ? Check : Plus}
+                >
                   {isWatched(movie.id) ? "Watched" : "Add to Library"}
                 </Button>
               </div>

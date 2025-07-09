@@ -11,13 +11,14 @@ export default function MovieCard({ movie, onClick }) {
       role="listitem"
       aria-label={`${
         movie.title || movie.name
-      }, rated ${movie.vote_average?.toFixed(1)} out of 10`}>
+      }, rated ${movie.vote_average?.toFixed(1)} out of 10`}
+    >
       <div className="aspect-[2/3] relative overflow-hidden">
         <img
           src={
             movie.poster_path
               ? IMG_BASE_URL + movie.poster_path
-              : "https://via.placeholder.com/500x750?text=No+Poster"
+              : "https://placehold.co/500x750?text=No+Poster"
           }
           alt={`${movie.title || movie.name} poster`}
           className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
