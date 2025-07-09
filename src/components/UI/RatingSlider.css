@@ -1,0 +1,58 @@
+.rating-slider-thumb::-webkit-slider-thumb {
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #f59e0b;
+  cursor: pointer;
+  border: 2px solid #1e293b;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.rating-slider-thumb::-webkit-slider-thumb:hover {
+  background: #d97706;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.rating-slider-thumb::-webkit-slider-thumb:active {
+  transform: scale(1.2);
+}
+
+.rating-slider-thumb::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #f59e0b;
+  cursor: pointer;
+  border: 2px solid #1e293b;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.rating-slider-thumb::-moz-range-thumb:hover {
+  background: #d97706;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.rating-slider-thumb:focus {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+.rating-slider-thumb:focus::-webkit-slider-thumb {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+/* Firefox specific styles */
+.rating-slider-thumb::-moz-range-track {
+  background: transparent;
+  border: none;
+}
+
+.rating-slider-thumb::-moz-focus-outer {
+  border: 0;
+}

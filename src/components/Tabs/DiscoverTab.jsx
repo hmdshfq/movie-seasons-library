@@ -5,6 +5,7 @@ import { useDebounce } from "../../hooks/useDebounce";
 import MovieGrid from "../MovieGrid/MovieGrid";
 import LoadingSpinner from "../UI/LoadingSpinner";
 import Button from "../UI/Button";
+import RatingSlider from "../UI/RatingSlider";
 import { GENRES, YEARS, SORT_OPTIONS } from "../../utils/constants";
 
 export default function DiscoverTab({ announce, showMovieDetails }) {
@@ -20,6 +21,7 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
   });
 
   const debouncedSearch = useDebounce(searchQuery, 500);
+  const debouncedRating = useDebounce(filters.minRating, 300);
 
   useEffect(() => {
     if (debouncedSearch) {
@@ -28,6 +30,23 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
       applyFilters();
     }
   }, [debouncedSearch]);
+
+  // Apply filters when debounced rating changes
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      applyFiltersWithDebouncedRating();
+    }
+  }, [debouncedRating]);
+
+  const applyFiltersWithDebouncedRating = async () => {
+    const filtersWithDebouncedRating = {
+      ...filters,
+      minRating: debouncedRating,
+    };
+    announce("Searching for movies...");
+    const results = await discoverMovies(filtersWithDebouncedRating);
+    announce(`Found ${results.length} results`);
+  };
 
   const applyFilters = async () => {
     // Clear search query when applying filters
@@ -62,12 +81,16 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Apply filters when they change (only if not searching)
+  const handleRatingChange = (value) => {
+    setFilters((prev) => ({ ...prev, minRating: value }));
+  };
+
+  // Apply filters when they change (only if not searching, excluding minRating which is debounced separately)
   useEffect(() => {
     if (!searchQuery.trim()) {
       applyFilters();
     }
-  }, [filters]);
+  }, [filters.mediaType, filters.genre, filters.year, filters.sortBy]);
 
   return (
     <section
@@ -200,24 +223,9 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
             </div>
 
             <div>
-              <label
-                htmlFor="rating-slider"
-                className="block text-sm font-medium text-gray-400 mb-2"
-              >
-                Min Rating: {filters.minRating}
-              </label>
-              <input
-                id="rating-slider"
-                type="range"
-                min="0"
-                max="10"
-                step="0.5"
+              <RatingSlider
                 value={filters.minRating}
-                onChange={(e) =>
-                  handleFilterChange("minRating", parseFloat(e.target.value))
-                }
-                className="w-full"
-                aria-label="Minimum rating"
+                onChange={handleRatingChange}
               />
             </div>
           </div>
