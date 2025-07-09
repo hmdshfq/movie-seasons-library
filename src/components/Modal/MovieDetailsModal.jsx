@@ -61,11 +61,11 @@ export default function MovieDetailsModal({
     >
       <div
         ref={modalRef}
-        className="bg-slate-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+        className="relative bg-slate-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header with backdrop */}
-        <div className="relative h-64 md:h-96">
+        <div>
           <img
             src={
               movie.backdrop_path
@@ -75,22 +75,21 @@ export default function MovieDetailsModal({
                   : "https://placehold.co/1280x720"
             }
             alt={`${movie.title || movie.name} backdrop`}
-            className="w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-800 via-slate-800/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-800  to-slate-700/85" />
+        </div>
 
+        {/* Content */}
+        <div className="relative p-6 md:p-8 overflow-y-auto flex-1">
           <button
             ref={closeRef}
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 bg-slate-900/80 rounded-full text-white hover:bg-slate-900 transition-colors"
+            className="absolute top-4 right-4 p-2 bg-slate-900/80 rounded-full text-white hover:bg-slate-900 transition-colors cursor-pointer"
             aria-label="Close movie details"
           >
             <X size={24} />
           </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-6 md:p-8 overflow-y-auto flex-1">
           <div className="flex flex-col md:flex-row gap-6">
             {/* Poster */}
             <div className="flex-shrink-0">
