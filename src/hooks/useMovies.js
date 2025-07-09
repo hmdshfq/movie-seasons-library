@@ -48,10 +48,10 @@ export function useMovies() {
     setLoading(true);
     try {
       const isKidsProfile = profile?.is_kids || false;
-      const movie = await tmdbService.getRandomMovie(mediaType, isKidsProfile);
-      if (movie) {
-        setMovies([movie]);
-        return movie;
+      const movies = await tmdbService.getRandomMovie(mediaType, isKidsProfile);
+      if (movies && movies.length > 0) {
+        setMovies(movies);
+        return movies;
       }
     } catch (error) {
       console.error("Error getting random movie:", error);

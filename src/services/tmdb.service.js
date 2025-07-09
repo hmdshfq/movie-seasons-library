@@ -193,12 +193,17 @@ export const tmdbService = {
       }
 
       if (results.results && results.results.length > 0) {
-        // Pick a random movie from the results
-        const randomIndex = Math.floor(Math.random() * results.results.length);
-        return results.results[randomIndex];
+        // Shuffle the array and return at least 5 movies
+        const shuffled = [...results.results].sort(() => 0.5 - Math.random());
+        const minMovies = 5;
+        const moviesToReturn = Math.max(
+          minMovies,
+          Math.min(shuffled.length, 10),
+        );
+        return shuffled.slice(0, moviesToReturn);
       }
 
-      return null;
+      return [];
     } catch (error) {
       console.error("Error getting random movie:", error);
       throw error;

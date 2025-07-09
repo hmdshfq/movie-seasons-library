@@ -70,10 +70,12 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
   };
 
   const handleRandomPick = async () => {
-    announce("Getting random suggestion...");
-    const movie = await getRandomMovie(filters.mediaType);
-    if (movie) {
-      announce(`Found random movie: ${movie.title || movie.name}`);
+    announce("Getting random suggestions...");
+    const movies = await getRandomMovie(filters.mediaType);
+    if (movies && movies.length > 0) {
+      announce(
+        `Found ${movies.length} random ${filters.mediaType === "tv" ? "TV shows" : "movies"}`,
+      );
     }
   };
 
@@ -243,7 +245,7 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
               onClick={handleRandomPick}
               variant="secondary"
               icon={Shuffle}
-              aria-label="Get random movie suggestion"
+              aria-label="Get random movie suggestions"
             >
               Random Pick
             </Button>
