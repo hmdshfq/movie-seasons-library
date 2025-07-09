@@ -13,6 +13,7 @@ import Profiles from "./pages/Profiles";
 import Home from "./pages/Home";
 import Library from "./pages/Library";
 import Recommendations from "./pages/Recommendations";
+import ManageProfiles from "./pages/ManageProfiles";
 
 import "./index.css";
 
@@ -33,6 +34,7 @@ function App() {
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/profiles" element={<Profiles />} />
+            <Route path="/manage-profiles" element={<ManageProfiles />} />
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
               <Route path="/library" element={<Library />} />
