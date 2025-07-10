@@ -14,6 +14,8 @@ import Home from "./pages/Home";
 import Library from "./pages/Library";
 import Recommendations from "./pages/Recommendations";
 import ManageProfiles from "./pages/ManageProfiles";
+import { WatchlistProvider } from "./contexts/WatchlistContext";
+import Watchlist from "./pages/Watchlist";
 
 import "./index.css";
 
@@ -26,25 +28,28 @@ function App() {
       }}
     >
       <AuthProvider>
-        <Routes>
-          {/* Auth Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+        <WatchlistProvider>
+          <Routes>
+            {/* Auth Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
 
-          {/* Protected Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/profiles" element={<Profiles />} />
-            <Route path="/manage-profiles" element={<ManageProfiles />} />
-            <Route element={<Layout />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/library" element={<Library />} />
-              <Route path="/recommendations" element={<Recommendations />} />
+            {/* Protected Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/profiles" element={<Profiles />} />
+              <Route path="/manage-profiles" element={<ManageProfiles />} />
+              <Route element={<Layout />}>
+                <Route path="/" element={<Home />} />
+                <Route path="/library" element={<Library />} />
+                <Route path="/watchlist" element={<Watchlist />} />
+                <Route path="/recommendations" element={<Recommendations />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Redirect root to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            {/* Redirect root to home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </WatchlistProvider>
       </AuthProvider>
     </Router>
   );

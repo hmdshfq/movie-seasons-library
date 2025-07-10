@@ -6,6 +6,7 @@ export default function Header({ activeTab, setActiveTab, announce }) {
   const tabs = [
     { id: "discover", label: "Discover" },
     { id: "library", label: "My Library" },
+    { id: "watchlist", label: "Watchlist" },
     { id: "recommendations", label: "For You" },
   ];
 
