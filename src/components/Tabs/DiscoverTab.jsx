@@ -10,8 +10,11 @@ import MediaTypeToggle from "../UI/MediaTypeToggle";
 import { GENRES, YEARS, SORT_OPTIONS } from "../../utils/constants";
 
 export default function DiscoverTab({ announce, showMovieDetails }) {
-  const { movies, loading, discoverMovies, searchMovies, getRandomMovie } =
-    useMovies();
+  const { movies, loading, discoverMovies, searchMovies, getRandomMovie } = useMovies();
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
+  const MOVIES_PER_PAGE = 18;
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     mediaType: "movie",
@@ -26,48 +29,53 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
 
   useEffect(() => {
     if (debouncedSearch) {
-      handleSearch();
+      handleSearch(1);
     } else {
-      applyFilters();
+      applyFilters(1);
     }
   }, [debouncedSearch]);
 
   // Apply filters when debounced rating changes
   useEffect(() => {
     if (!searchQuery.trim()) {
-      applyFiltersWithDebouncedRating();
+      applyFiltersWithDebouncedRating(1);
     }
   }, [debouncedRating]);
 
-  const applyFiltersWithDebouncedRating = async () => {
+  const applyFiltersWithDebouncedRating = async (page = 1) => {
+    setCurrentPage(page);
     const filtersWithDebouncedRating = {
       ...filters,
       minRating: debouncedRating,
     };
     announce("Searching for movies...");
-    const results = await discoverMovies(filtersWithDebouncedRating);
-    announce(`Found ${results.length} results`);
+    const { results, total } = await discoverMovies(filtersWithDebouncedRating, page, MOVIES_PER_PAGE);
+    setTotalResults(total || 0);
+    announce(`Found ${total || (results ? results.length : 0)} results`);
   };
 
-  const applyFilters = async () => {
+  const applyFilters = async (page = 1) => {
+    setCurrentPage(page);
     // Clear search query when applying filters
     if (searchQuery.trim()) {
       setSearchQuery("");
     }
     announce("Searching for movies...");
-    const results = await discoverMovies(filters);
-    announce(`Found ${results.length} results`);
+    const { results, total } = await discoverMovies(filters, page, MOVIES_PER_PAGE);
+    setTotalResults(total || 0);
+    announce(`Found ${total || (results ? results.length : 0)} results`);
   };
 
-  const handleSearch = async () => {
+  const handleSearch = async (page = 1) => {
+    setCurrentPage(page);
     if (!searchQuery.trim()) {
-      applyFilters();
+      applyFilters(page);
       return;
     }
-
     announce(`Searching for ${searchQuery}...`);
-    const results = await searchMovies(searchQuery, filters.mediaType);
-    announce(`Found ${results.length} results for "${searchQuery}"`);
+    const { results, total } = await searchMovies(searchQuery, filters.mediaType, page, MOVIES_PER_PAGE);
+    setTotalResults(total || 0);
+    announce(`Found ${total || (results ? results.length : 0)} results for "${searchQuery}"`);
   };
 
   const handleRandomPick = async () => {
@@ -91,9 +99,14 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
   // Apply filters when they change (only if not searching, excluding minRating which is debounced separately)
   useEffect(() => {
     if (!searchQuery.trim()) {
-      applyFilters();
+      applyFilters(1);
     }
   }, [filters.mediaType, filters.genre, filters.year, filters.sortBy]);
+
+  // Reset to first page when filters/search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters.mediaType, filters.genre, filters.year, filters.sortBy, searchQuery]);
 
   return (
     <section
@@ -222,7 +235,7 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
 
           <div className="flex flex-wrap gap-4 justify-center">
             <Button
-              onClick={applyFilters}
+              onClick={() => applyFilters(1)}
               variant="primary"
               icon={Search}
               aria-label="Apply filters to search"
@@ -244,7 +257,45 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
       {loading ? (
         <LoadingSpinner message="Finding great content for you..." />
       ) : (
-        <MovieGrid movies={movies} onMovieClick={showMovieDetails} />
+        <>
+          <MovieGrid movies={movies} onMovieClick={showMovieDetails} />
+          {/* Pagination Controls */}
+          {totalResults > MOVIES_PER_PAGE && (
+            <div className="flex justify-center items-center gap-2 mt-8">
+              <button
+                onClick={() => {
+                  if (currentPage > 1) {
+                    searchQuery.trim()
+                      ? handleSearch(currentPage - 1)
+                      : applyFilters(currentPage - 1);
+                  }
+                }}
+                disabled={currentPage === 1}
+                className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === 1 ? 'bg-slate-700 text-gray-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+                aria-label="Previous page"
+              >
+                Previous
+              </button>
+              <span className="mx-2 text-gray-300">
+                Page {currentPage} of {Math.ceil(totalResults / MOVIES_PER_PAGE)}
+              </span>
+              <button
+                onClick={() => {
+                  if (currentPage < Math.ceil(totalResults / MOVIES_PER_PAGE)) {
+                    searchQuery.trim()
+                      ? handleSearch(currentPage + 1)
+                      : applyFilters(currentPage + 1);
+                  }
+                }}
+                disabled={currentPage === Math.ceil(totalResults / MOVIES_PER_PAGE)}
+                className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === Math.ceil(totalResults / MOVIES_PER_PAGE) ? 'bg-slate-700 text-gray-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+                aria-label="Next page"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
       )}
     </section>
   );

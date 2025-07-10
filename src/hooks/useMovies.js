@@ -7,13 +7,17 @@ export function useMovies() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const discoverMovies = async (filters) => {
+  const MOVIES_PER_PAGE = 18;
+  const discoverMovies = async (filters, page = 1) => {
     setLoading(true);
     try {
       const isKidsProfile = profile?.is_kids || false;
       const results = await tmdbService.discoverMovies(filters, isKidsProfile);
-      setMovies(results);
-      return results;
+      const start = (page - 1) * MOVIES_PER_PAGE;
+      const end = start + MOVIES_PER_PAGE;
+      const paged = Array.isArray(results) ? results.slice(start, end) : [];
+      setMovies(paged);
+      return { results: paged, total: Array.isArray(results) ? results.length : 0 };
     } catch (error) {
       console.error("Error fetching movies:", error);
       setMovies([]);
@@ -23,8 +27,8 @@ export function useMovies() {
     }
   };
 
-  const searchMovies = async (query, mediaType) => {
-    if (!query.trim()) return;
+  const searchMovies = async (query, mediaType, page = 1) => {
+    if (!query.trim()) return { results: [], total: 0 };
 
     setLoading(true);
     try {
@@ -33,8 +37,11 @@ export function useMovies() {
         { query, mediaType },
         isKidsProfile,
       );
-      setMovies(results);
-      return results;
+      const start = (page - 1) * MOVIES_PER_PAGE;
+      const end = start + MOVIES_PER_PAGE;
+      const paged = Array.isArray(results) ? results.slice(start, end) : [];
+      setMovies(paged);
+      return { results: paged, total: Array.isArray(results) ? results.length : 0 };
     } catch (error) {
       console.error("Error searching movies:", error);
       setMovies([]);
