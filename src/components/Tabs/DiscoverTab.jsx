@@ -8,10 +8,12 @@ import Button from "../UI/Button";
 import RatingSlider from "../UI/RatingSlider";
 import MediaTypeToggle from "../UI/MediaTypeToggle";
 import { GENRES, YEARS, SORT_OPTIONS } from "../../utils/constants";
+import { useWatchedAndWatchlist } from "../../hooks/useWatchedAndWatchlist";
 
 export default function DiscoverTab({ announce, showMovieDetails }) {
   const { movies, loading, discoverMovies, searchMovies, getRandomMovie } =
     useMovies();
+  const { watched, watchlist } = useWatchedAndWatchlist();
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
@@ -96,11 +98,22 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
 
   const handleRandomPick = async () => {
     announce("Getting random suggestions...");
-    const movies = await getRandomMovie(filters.mediaType);
+    let movies = await getRandomMovie(filters.mediaType);
+    // Filter out watched and watchlist movies
+    if (movies && (watched.length > 0 || watchlist.length > 0)) {
+      const watchedIds = new Set(watched.map((m) => `${m.movie_id}-${m.media_type || 'movie'}`));
+      const watchlistIds = new Set(watchlist.map((m) => `${m.movie_id}-${m.media_type || 'movie'}`));
+      movies = movies.filter((movie) => {
+        const id = `${movie.id}-${movie.media_type || 'movie'}`;
+        return !watchedIds.has(id) && !watchlistIds.has(id);
+      });
+    }
     if (movies && movies.length > 0) {
       announce(
         `Found ${movies.length} random ${filters.mediaType === "tv" ? "TV shows" : "movies"}`,
       );
+    } else {
+      announce("No new random movies or shows found (all are watched or in your watchlist)");
     }
   };
 
