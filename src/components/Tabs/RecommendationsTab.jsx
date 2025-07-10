@@ -41,11 +41,11 @@ export default function RecommendationsTab({ showMovieDetails, announce }) {
     try {
       const watched = await movieService.getWatchedMovies(profile.id);
       const recommendationSet = new Set();
-      const targetCount = 20;
+      const targetCount = 6;
 
       // Start with more recent movies and get more recommendations per movie
       let movieIndex = 0;
-      let recsPerMovie = 6; // Increased from 4 to 6
+      let recsPerMovie = 6;
 
       while (
         recommendationSet.size < targetCount &&
@@ -66,12 +66,21 @@ export default function RecommendationsTab({ showMovieDetails, announce }) {
         }
 
         movieIndex += moviesToProcess.length;
-        recsPerMovie = Math.min(recsPerMovie + 2, 10); // Increase recommendations per movie if needed
+        recsPerMovie = Math.min(recsPerMovie + 2, 10);
       }
 
-      const uniqueRecommendations = Array.from(recommendationSet)
-        .map((r) => JSON.parse(r))
-        .slice(0, targetCount); // Ensure exactly 20 recommendations
+      // Shuffle recommendations before picking 6
+      const shuffle = (arr) => {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      };
+
+      const allRecommendations = Array.from(recommendationSet).map((r) => JSON.parse(r));
+      const shuffled = shuffle(allRecommendations);
+      const uniqueRecommendations = shuffled.slice(0, targetCount); // Random 6
 
       setRecommendations(uniqueRecommendations);
       announce(
