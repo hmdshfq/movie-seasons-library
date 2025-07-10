@@ -40,6 +40,7 @@ export default function RecommendationsTab({ showMovieDetails, announce }) {
 
     try {
       const watched = await movieService.getWatchedMovies(profile.id);
+      const watchedIds = new Set(watched.map((m) => m.movie_id));
       const recommendationSet = new Set();
       const targetCount = 6;
 
@@ -60,9 +61,12 @@ export default function RecommendationsTab({ showMovieDetails, announce }) {
           if (recommendationSet.size >= targetCount) break;
 
           const recs = await tmdbService.getRecommendations(movie.movie_id);
-          recs.slice(0, recsPerMovie).forEach((rec) => {
-            recommendationSet.add(JSON.stringify(rec));
-          });
+          recs
+            .filter((rec) => !watchedIds.has(rec.id))
+            .slice(0, recsPerMovie)
+            .forEach((rec) => {
+              recommendationSet.add(JSON.stringify(rec));
+            });
         }
 
         movieIndex += moviesToProcess.length;
