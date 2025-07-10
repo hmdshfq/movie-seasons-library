@@ -44,33 +44,18 @@ export default function RecommendationsTab({ showMovieDetails, announce }) {
       const recommendationSet = new Set();
       const targetCount = 6;
 
-      // Start with more recent movies and get more recommendations per movie
-      let movieIndex = 0;
-      let recsPerMovie = 6;
+      // Use the entire watched history for recommendations
+      const recsPerMovie = 6;
+      for (const movie of watched) {
+        if (recommendationSet.size >= targetCount) break;
 
-      while (
-        recommendationSet.size < targetCount &&
-        movieIndex < watched.length
-      ) {
-        const moviesToProcess = watched.slice(
-          -Math.min(8 + movieIndex, watched.length),
-          watched.length - movieIndex,
-        );
-
-        for (const movie of moviesToProcess) {
-          if (recommendationSet.size >= targetCount) break;
-
-          const recs = await tmdbService.getRecommendations(movie.movie_id);
-          recs
-            .filter((rec) => !watchedIds.has(rec.id))
-            .slice(0, recsPerMovie)
-            .forEach((rec) => {
-              recommendationSet.add(JSON.stringify(rec));
-            });
-        }
-
-        movieIndex += moviesToProcess.length;
-        recsPerMovie = Math.min(recsPerMovie + 2, 10);
+        const recs = await tmdbService.getRecommendations(movie.movie_id);
+        recs
+          .filter((rec) => !watchedIds.has(rec.id))
+          .slice(0, recsPerMovie)
+          .forEach((rec) => {
+            recommendationSet.add(JSON.stringify(rec));
+          });
       }
 
       // Shuffle recommendations before picking 6
