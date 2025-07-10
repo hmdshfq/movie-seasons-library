@@ -13,11 +13,11 @@ export default function MediaTypeToggle({ value, onChange, className = "" }) {
       </label>
 
       {/* Toggle Container */}
-      <div className="relative bg-slate-700 rounded-full p-1 w-full max-w-xs mx-auto">
+      <div className="relative bg-slate-700 rounded-2xl p-1 w-full">
         {/* Background Slider */}
         <div
-          className={`absolute top-1 bottom-1 w-1/2 rounded-full bg-gradient-to-r from-indigo-500 to-pink-500 transition-all duration-300 ease-out transform ${
-            value === "movie" ? "translate-x-0" : "translate-x-full"
+          className={`absolute top-1 bottom-1 w-1/2 rounded-xl bg-gradient-to-r from-indigo-500 to-pink-500 transition-all duration-300 ease-out transform ${
+            value === "movie" ? "translate-x-0" : "translate-x-[96%]"
           }`}
           style={{
             boxShadow: "0 4px 20px rgba(99, 102, 241, 0.3)",
@@ -25,11 +25,11 @@ export default function MediaTypeToggle({ value, onChange, className = "" }) {
         />
 
         {/* Options Container */}
-        <div className="relative z-10 flex">
+        <div className="relative z-10 flex flex-wrap">
           {/* Movie Option */}
           <button
             onClick={() => onChange("movie")}
-            className={`flex-1 flex items-center justify-center py-3 px-4 rounded-full transition-all duration-300 ${
+            className={`flex-1 flex items-center justify-center py-3 px-4 rounded-xl transition-all duration-300 ${
               value === "movie"
                 ? "text-white"
                 : "text-gray-400 hover:text-gray-200"
@@ -48,7 +48,7 @@ export default function MediaTypeToggle({ value, onChange, className = "" }) {
           {/* TV Shows Option */}
           <button
             onClick={() => onChange("tv")}
-            className={`flex-1 flex items-center justify-center py-3 px-4 rounded-full transition-all duration-300 ${
+            className={`flex-1 flex items-center justify-center py-3 px-4 rounded-xl transition-all duration-300 ${
               value === "tv"
                 ? "text-white"
                 : "text-gray-400 hover:text-gray-200"

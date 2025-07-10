@@ -134,3 +134,8 @@ html {
     clip: auto;
     white-space: normal;
 }
+
+/* Buttons */
+button {
+    cursor: pointer;
+}

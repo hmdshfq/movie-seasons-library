@@ -10,7 +10,8 @@ import MediaTypeToggle from "../UI/MediaTypeToggle";
 import { GENRES, YEARS, SORT_OPTIONS } from "../../utils/constants";
 
 export default function DiscoverTab({ announce, showMovieDetails }) {
-  const { movies, loading, discoverMovies, searchMovies, getRandomMovie } = useMovies();
+  const { movies, loading, discoverMovies, searchMovies, getRandomMovie } =
+    useMovies();
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
@@ -49,7 +50,11 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
       minRating: debouncedRating,
     };
     announce("Searching for movies...");
-    const { results, total } = await discoverMovies(filtersWithDebouncedRating, page, MOVIES_PER_PAGE);
+    const { results, total } = await discoverMovies(
+      filtersWithDebouncedRating,
+      page,
+      MOVIES_PER_PAGE,
+    );
     setTotalResults(total || 0);
     announce(`Found ${total || (results ? results.length : 0)} results`);
   };
@@ -61,7 +66,11 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
       setSearchQuery("");
     }
     announce("Searching for movies...");
-    const { results, total } = await discoverMovies(filters, page, MOVIES_PER_PAGE);
+    const { results, total } = await discoverMovies(
+      filters,
+      page,
+      MOVIES_PER_PAGE,
+    );
     setTotalResults(total || 0);
     announce(`Found ${total || (results ? results.length : 0)} results`);
   };
@@ -73,9 +82,16 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
       return;
     }
     announce(`Searching for ${searchQuery}...`);
-    const { results, total } = await searchMovies(searchQuery, filters.mediaType, page, MOVIES_PER_PAGE);
+    const { results, total } = await searchMovies(
+      searchQuery,
+      filters.mediaType,
+      page,
+      MOVIES_PER_PAGE,
+    );
     setTotalResults(total || 0);
-    announce(`Found ${total || (results ? results.length : 0)} results for "${searchQuery}"`);
+    announce(
+      `Found ${total || (results ? results.length : 0)} results for "${searchQuery}"`,
+    );
   };
 
   const handleRandomPick = async () => {
@@ -106,7 +122,13 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
   // Reset to first page when filters/search change
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters.mediaType, filters.genre, filters.year, filters.sortBy, searchQuery]);
+  }, [
+    filters.mediaType,
+    filters.genre,
+    filters.year,
+    filters.sortBy,
+    searchQuery,
+  ]);
 
   return (
     <section
@@ -154,7 +176,7 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
         {/* Filters */}
         <div className="border-t border-slate-700 pt-6">
           <h3 className="text-lg font-semibold mb-4">Filters</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
             <div>
               <MediaTypeToggle
                 value={filters.mediaType}
@@ -271,13 +293,14 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
                   }
                 }}
                 disabled={currentPage === 1}
-                className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === 1 ? 'bg-slate-700 text-gray-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+                className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === 1 ? "bg-slate-700 text-gray-400 cursor-not-allowed" : "bg-indigo-600 text-white hover:bg-indigo-700"}`}
                 aria-label="Previous page"
               >
                 Previous
               </button>
               <span className="mx-2 text-gray-300">
-                Page {currentPage} of {Math.ceil(totalResults / MOVIES_PER_PAGE)}
+                Page {currentPage} of{" "}
+                {Math.ceil(totalResults / MOVIES_PER_PAGE)}
               </span>
               <button
                 onClick={() => {
@@ -287,8 +310,10 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
                       : applyFilters(currentPage + 1);
                   }
                 }}
-                disabled={currentPage === Math.ceil(totalResults / MOVIES_PER_PAGE)}
-                className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === Math.ceil(totalResults / MOVIES_PER_PAGE) ? 'bg-slate-700 text-gray-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+                disabled={
+                  currentPage === Math.ceil(totalResults / MOVIES_PER_PAGE)
+                }
+                className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === Math.ceil(totalResults / MOVIES_PER_PAGE) ? "bg-slate-700 text-gray-400 cursor-not-allowed" : "bg-indigo-600 text-white hover:bg-indigo-700"}`}
                 aria-label="Next page"
               >
                 Next

@@ -58,7 +58,7 @@ export default function LibraryTab({ showMovieDetails }) {
     <section className="animate-fadeIn" aria-label="Your watched library">
       <div className="bg-slate-800 rounded-2xl p-6 shadow-2xl">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">My Library</h2>
+          <h2 className="text-2xl font-bold">Watched</h2>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}

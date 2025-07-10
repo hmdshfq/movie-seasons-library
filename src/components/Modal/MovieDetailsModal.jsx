@@ -175,18 +175,29 @@ export default function MovieDetailsModal({
                   variant={isWatched(movie.id) ? "secondary" : "primary"}
                   icon={isWatched(movie.id) ? Check : Plus}
                 >
-                  {isWatched(movie.id) ? "Watched" : "Add to Library"}
+                  {isWatched(movie.id) ? "Watched" : "Add to Watched"}
                 </Button>
                 <Button
                   onClick={() =>
                     isInWatchlist(movie.id)
-                      ? removeFromWatchlist(movie.id, movie.media_type || (movie.first_air_date ? 'tv' : 'movie'))
-                      : addToWatchlist({ ...movie, media_type: movie.media_type || (movie.first_air_date ? 'tv' : 'movie') })
+                      ? removeFromWatchlist(
+                          movie.id,
+                          movie.media_type ||
+                            (movie.first_air_date ? "tv" : "movie"),
+                        )
+                      : addToWatchlist({
+                          ...movie,
+                          media_type:
+                            movie.media_type ||
+                            (movie.first_air_date ? "tv" : "movie"),
+                        })
                   }
                   variant={isInWatchlist(movie.id) ? "secondary" : "primary"}
                   icon={isInWatchlist(movie.id) ? Check : Plus}
                 >
-                  {isInWatchlist(movie.id) ? "In Watchlist" : "Add to Watchlist"}
+                  {isInWatchlist(movie.id)
+                    ? "In Watchlist"
+                    : "Add to Watchlist"}
                 </Button>
               </div>
             </div>

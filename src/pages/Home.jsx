@@ -5,6 +5,8 @@ import MovieDetailsModal from "../components/Modal/MovieDetailsModal";
 import { useState, useEffect } from "react";
 import { useOutletContext, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { tmdbService } from "../services/tmdb.service";
+import { movieService } from "../services/movie.service";
 
 export default function Home() {
   const { activeTab, announce } = useOutletContext();
@@ -82,9 +84,7 @@ export default function Home() {
         <DiscoverTab announce={announce} showMovieDetails={showMovieDetails} />
       )}
 
-      {tab === "library" && (
-        <LibraryTab showMovieDetails={showMovieDetails} />
-      )}
+      {tab === "library" && <LibraryTab showMovieDetails={showMovieDetails} />}
 
       {tab === "recommendations" && (
         <RecommendationsTab
