@@ -1,13 +1,15 @@
 import { useAuth } from "../../contexts/AuthContext";
 import UserMenu from "./UserMenu";
+import { useNavigate } from "react-router-dom";
 
 export default function Header({ activeTab, setActiveTab, announce }) {
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const tabs = [
-    { id: "discover", label: "Discover" },
-    { id: "library", label: "My Library" },
-    { id: "watchlist", label: "Watchlist" },
-    { id: "recommendations", label: "For You" },
+    { id: "discover", label: "Discover", route: "/" },
+    { id: "library", label: "My Library", route: "/library" },
+    { id: "watchlist", label: "Watchlist", route: "/watchlist" },
+    { id: "recommendations", label: "For You", route: "/recommendations" },
   ];
 
   return (
@@ -27,6 +29,7 @@ export default function Header({ activeTab, setActiveTab, announce }) {
                       onClick={() => {
                         setActiveTab(tab.id);
                         announce(`Switched to ${tab.label} tab`);
+                        navigate(tab.route);
                       }}
                       className={`px-6 py-2 rounded-full font-medium transition-all duration-300 ${
                         activeTab === tab.id
@@ -41,8 +44,7 @@ export default function Header({ activeTab, setActiveTab, announce }) {
                 ))}
               </ul>
             </nav>
-
-            {profile && <UserMenu />}
+            <UserMenu />
           </div>
         </div>
       </div>

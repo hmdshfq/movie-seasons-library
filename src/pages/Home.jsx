@@ -1,15 +1,26 @@
-import { useState } from "react";
-import { useOutletContext } from "react-router-dom";
 import DiscoverTab from "../components/Tabs/DiscoverTab";
 import LibraryTab from "../components/Tabs/LibraryTab";
 import RecommendationsTab from "../components/Tabs/RecommendationsTab";
 import MovieDetailsModal from "../components/Modal/MovieDetailsModal";
+import { useState, useEffect } from "react";
+import { useOutletContext, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { movieService } from "../services/movie.service";
-import { tmdbService } from "../services/tmdb.service";
 
 export default function Home() {
   const { activeTab, announce } = useOutletContext();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const tabFromPath = () => {
+    if (location.pathname === "/library") return "library";
+    if (location.pathname === "/recommendations") return "recommendations";
+    return "discover";
+  };
+  const [tab, setTab] = useState(tabFromPath());
+
+  // Sync tab with route
+  useEffect(() => {
+    setTab(tabFromPath());
+  }, [location.pathname]);
   const { profile } = useAuth();
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -67,15 +78,15 @@ export default function Home() {
 
   return (
     <>
-      {activeTab === "discover" && (
+      {tab === "discover" && (
         <DiscoverTab announce={announce} showMovieDetails={showMovieDetails} />
       )}
 
-      {activeTab === "library" && (
+      {tab === "library" && (
         <LibraryTab showMovieDetails={showMovieDetails} />
       )}
 
-      {activeTab === "recommendations" && (
+      {tab === "recommendations" && (
         <RecommendationsTab
           showMovieDetails={showMovieDetails}
           announce={announce}
