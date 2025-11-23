@@ -9,13 +9,14 @@ export default function ProfileForm({ profile, onSubmit, onCancel, loading }) {
   const [formData, setFormData] = useState({
     name: profile?.name || "",
     isKids: profile?.is_kids || false,
-    avatarColor: profile
+    avatarColor: profile?.avatar_url
       ? extractColorFromUrl(profile.avatar_url)
       : DEFAULT_AVATAR_COLORS[0],
   });
   const [error, setError] = useState("");
 
   function extractColorFromUrl(url) {
+    if (!url) return DEFAULT_AVATAR_COLORS[0];
     const match = url.match(/background=([a-fA-F0-9]{6})/);
     return match ? `#${match[1]}` : DEFAULT_AVATAR_COLORS[0];
   }
