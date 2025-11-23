@@ -1,48 +1,32 @@
-import { supabase } from '../lib/supabase';
+import { api } from '../lib/api';
 
 export const watchlistService = {
-  async getWatchlist(profileId) {
-    const { data, error } = await supabase
-      .from('watchlist')
-      .select('*')
-      .eq('profile_id', profileId)
-      .order('added_at', { ascending: false });
-    if (error) throw error;
-    return data || [];
+  async getWatchlist() {
+    return api.get('/api/watchlist');
   },
 
-  async addToWatchlist(profileId, movie) {
-    // movie.media_type should be 'movie' or 'tv'
-    const { data, error } = await supabase
-      .from('watchlist')
-      .insert([
-        {
-          profile_id: profileId,
-          movie_id: movie.id,
-          media_type: movie.media_type || 'movie',
-          title: movie.title || movie.name,
-          poster_path: movie.poster_path,
-          added_at: new Date().toISOString(),
-        },
-      ])
-      .select()
-      .single();
-    if (error) {
-      if (error.code === '23505') {
+  async addToWatchlist(movie) {
+    try {
+      return await api.post('/api/watchlist', {
+        movie_id: movie.id,
+        media_type: movie.media_type || 'movie',
+        title: movie.title || movie.name,
+        poster_path: movie.poster_path
+      });
+    } catch (error) {
+      if (error.message.includes('duplicate')) {
         return { exists: true };
       }
       throw error;
     }
-    return data;
   },
 
-  async removeFromWatchlist(profileId, movieId, mediaType = 'movie') {
-    const { error } = await supabase
-      .from('watchlist')
-      .delete()
-      .eq('profile_id', profileId)
-      .eq('movie_id', movieId)
-      .eq('media_type', mediaType);
-    if (error) throw error;
+  async removeFromWatchlist(movieId, mediaType = 'movie') {
+    return api.delete(`/api/watchlist/${movieId}?media_type=${mediaType}`);
   },
+
+  async isInWatchlist(movieId, mediaType = 'movie') {
+    const result = await api.get(`/api/watchlist/${movieId}/check?media_type=${mediaType}`);
+    return result.inWatchlist;
+  }
 };

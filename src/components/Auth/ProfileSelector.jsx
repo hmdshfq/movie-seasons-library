@@ -5,12 +5,17 @@ import { useState } from "react";
 import CreateProfileModal from "../Modal/CreateProfileModal";
 
 export default function ProfileSelector() {
-  const { profiles, switchProfile } = useAuth();
+  const { profiles, profile } = useAuth();
   const navigate = useNavigate();
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const handleProfileSelect = (profileId) => {
-    switchProfile(profileId);
+  // If only one profile, skip to home
+  if (profiles.length === 1) {
+    navigate("/");
+    return null;
+  }
+
+  const handleProfileSelect = () => {
     navigate("/");
   };
 
@@ -25,26 +30,26 @@ export default function ProfileSelector() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
-          {profiles.map((profile) => (
+          {profiles.map((prof) => (
             <button
-              key={profile.id}
-              onClick={() => handleProfileSelect(profile.id)}
+              key={prof.id}
+              onClick={() => handleProfileSelect()}
               className="group text-center transition-all transform hover:scale-105"
-              aria-label={`Select ${profile.name} profile`}>
+              aria-label={`Select ${prof.name} profile`}>
               <div className="relative mb-4">
                 <img
-                  src={profile.avatar_url}
-                  alt={profile.name}
+                  src={prof.avatar_url}
+                  alt={prof.name}
                   className="w-32 h-32 mx-auto rounded-lg object-cover group-hover:ring-4 group-hover:ring-indigo-500 transition-all"
                 />
-                {profile.is_kids && (
+                {prof.is_kids && (
                   <span className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
                     Kids
                   </span>
                 )}
               </div>
               <h3 className="text-lg font-medium text-gray-200 group-hover:text-white transition-colors">
-                {profile.name}
+                {prof.name}
               </h3>
             </button>
           ))}

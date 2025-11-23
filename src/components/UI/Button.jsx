@@ -4,6 +4,10 @@ export default function Button({
   variant = "primary",
   icon: Icon,
   ariaLabel,
+  fullWidth,
+  loading,
+  type = "button",
+  disabled = false,
   ...props
 }) {
   const variants = {
@@ -14,10 +18,14 @@ export default function Button({
     danger: "bg-red-600 text-white hover:bg-red-700",
   };
 
+  const widthClass = fullWidth ? "w-full" : "";
+
   return (
     <button
       onClick={onClick}
-      className={`spring-button px-8 py-3 rounded-full font-semibold flex items-center gap-2 ${variants[variant]}`}
+      type={type}
+      disabled={disabled || loading}
+      className={`spring-button px-8 py-3 rounded-full font-semibold flex items-center gap-2 ${variants[variant]} ${widthClass}`}
       aria-label={ariaLabel}
       {...props}>
       {Icon && <Icon size={20} aria-hidden="true" />}

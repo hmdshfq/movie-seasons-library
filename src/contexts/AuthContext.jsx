@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { supabase } from "../lib/supabase";
+import { authService } from "../services/auth.service";
+import { profileService } from "../services/profile.service";
 import { useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext({});
@@ -9,7 +10,6 @@ export const useAuth = () => useContext(AuthContext);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
-  const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -18,199 +18,127 @@ export function AuthProvider({ children }) {
 
     const initializeAuth = async () => {
       try {
-        // Get current session
-        const {
-          data: { session },
-          error,
-        } = await supabase.auth.getSession();
-
-        if (error) {
-          console.error("Auth session error:", error);
-          if (mounted) {
-            setUser(null);
-            setLoading(false);
-          }
-          return;
-        }
+        const session = await authService.getSession();
 
         if (mounted) {
-          setUser(session?.user || null);
-
-          // If user exists, fetch profiles
           if (session?.user) {
-            await fetchProfiles(session.user.id);
+            setUser(session.user);
+            // Fetch profile for authenticated user
+            await fetchProfile();
+          } else {
+            setUser(null);
+            setProfile(null);
           }
-
           setLoading(false);
         }
       } catch (error) {
         console.error("Auth initialization error:", error);
         if (mounted) {
           setUser(null);
+          setProfile(null);
           setLoading(false);
         }
       }
     };
 
-    // Set up auth state listener
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!mounted) return;
+    initializeAuth();
 
-      if (event === "SIGNED_OUT") {
-        setUser(null);
-        setProfile(null);
-        setProfiles([]);
-        return;
-      }
-
-      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-        setUser(session?.user || null);
-
-        if (session?.user) {
-          fetchProfiles(session.user.id).catch(console.error);
-        } else {
-          setProfiles([]);
+    // Listen for storage changes (auth token updates)
+    const handleStorageChange = (e) => {
+      if (e.key === "authToken") {
+        if (e.newValue) {
+          initializeAuth();
+        } else if (mounted) {
+          setUser(null);
           setProfile(null);
         }
       }
-    });
+    };
 
-    // Initialize auth
-    initializeAuth();
+    window.addEventListener("storage", handleStorageChange);
 
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
 
-  const fetchProfiles = async (userId) => {
+  const fetchProfile = async () => {
     try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: true });
-
-      if (error) {
-        console.warn("Profile fetch error:", error.message);
-        setProfiles([]);
-        setProfile(null);
-        return;
-      }
-
-      if (data && data.length > 0) {
-        setProfiles(data);
-
-        // Check for saved profile preference
-        const savedProfileId = localStorage.getItem("activeProfileId");
-        const savedProfile = data.find((p) => p.id === savedProfileId);
-
-        if (savedProfile) {
-          setProfile(savedProfile);
-        } else {
-          setProfile(data[0]);
-        }
-      } else {
-        setProfiles([]);
-        setProfile(null);
+      const profileData = await profileService.getProfile();
+      if (profileData) {
+        setProfile(profileData);
+        localStorage.setItem("activeProfileId", profileData.id);
       }
     } catch (error) {
-      console.warn("fetchProfiles error:", error.message);
-      setProfiles([]);
+      console.warn("Profile fetch error:", error.message);
       setProfile(null);
     }
   };
 
-  const signUp = async (email, password) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (error) throw error;
-
-    // Create default profile for new user
-    if (data.user) {
-      await createProfile(data.user.id, "Main Profile");
+  const signUp = async (email, password, name = "") => {
+    const result = await authService.signUp(email, password, name);
+    if (result.user) {
+      setUser(result.user);
+      // Fetch profile after signup
+      await fetchProfile();
     }
-
-    return data;
+    return result;
   };
 
   const signIn = async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) throw error;
-    return data;
+    const result = await authService.signIn(email, password);
+    if (result.user) {
+      setUser(result.user);
+      // Fetch profile after login
+      await fetchProfile();
+    }
+    return result;
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    await authService.signOut();
 
     // Clear local state
     setUser(null);
     setProfile(null);
-    setProfiles([]);
     localStorage.removeItem("activeProfileId");
 
     navigate("/login");
   };
 
-  const createProfile = async (
-    userId,
-    name,
-    isKids = false,
-    avatarUrl = null,
-  ) => {
-    const profileData = {
-      user_id: userId || user.id,
-      name,
-      is_kids: isKids,
-      avatar_url:
-        avatarUrl ||
-        `https://ui-avatars.com/api/?name=${encodeURIComponent(
-          name,
-        )}&background=random`,
-    };
-
-    const { data, error } = await supabase
-      .from("profiles")
-      .insert([profileData])
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    setProfiles((prev) => [...prev, data]);
-    return data;
+  const updateProfile = async (updates) => {
+    const updated = await profileService.updateProfile(updates);
+    if (updated) {
+      setProfile(updated);
+    }
+    return updated;
   };
 
-  const switchProfile = (profileId) => {
-    const selectedProfile = profiles.find((p) => p.id === profileId);
-    if (selectedProfile) {
-      setProfile(selectedProfile);
-      localStorage.setItem("activeProfileId", profileId);
+  // Fetch profiles (returns array for compatibility, typically just one)
+  const fetchProfiles = async () => {
+    try {
+      const profileData = await profileService.getProfile();
+      if (profileData) {
+        setProfile(profileData);
+      }
+    } catch (error) {
+      console.warn("Failed to fetch profiles:", error);
     }
   };
 
   const value = {
     user,
     profile,
-    profiles,
+    profiles: profile ? [profile] : [],
     loading,
     signUp,
     signIn,
     signOut,
-    createProfile,
-    switchProfile,
-    fetchProfiles: (userId) => fetchProfiles(userId),
+    updateProfile,
+    fetchProfile,
+    fetchProfiles,
+    switchProfile: () => {}, // No-op for single profile mode
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

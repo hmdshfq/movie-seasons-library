@@ -21,7 +21,7 @@ export default function RecommendationsTab({ showMovieDetails, announce }) {
     if (!profile) return;
 
     try {
-      const watched = await movieService.getWatchedMovies(profile.id);
+      const watched = await movieService.getWatchedMovies();
       setHasWatchedMovies(watched.length > 0);
 
       if (watched.length > 0) {
@@ -39,7 +39,7 @@ export default function RecommendationsTab({ showMovieDetails, announce }) {
     announce("Getting personalized recommendations...");
 
     try {
-      const watched = await movieService.getWatchedMovies(profile.id);
+      const watched = await movieService.getWatchedMovies();
       const watchedIds = new Set(watched.map((m) => m.movie_id));
       const recommendationSet = new Set();
       const targetCount = 6;

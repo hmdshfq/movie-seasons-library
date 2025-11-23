@@ -20,7 +20,7 @@ export default function LibraryTab({ showMovieDetails }) {
   const fetchWatchedMovies = async () => {
     setLoading(true);
     try {
-      const movies = await movieService.getWatchedMovies(profile.id);
+      const movies = await movieService.getWatchedMovies();
       setWatchedMovies(movies);
     } catch (error) {
       console.error("Error fetching watched movies:", error);
@@ -31,7 +31,7 @@ export default function LibraryTab({ showMovieDetails }) {
 
   const removeFromLibrary = async (movieId) => {
     try {
-      await movieService.removeWatchedMovie(profile.id, movieId);
+      await movieService.removeWatchedMovie(movieId);
       setWatchedMovies((prev) => prev.filter((m) => m.movie_id !== movieId));
     } catch (error) {
       console.error("Error removing movie:", error);

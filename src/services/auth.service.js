@@ -1,62 +1,49 @@
-import { supabase } from '../lib/supabase';
+import { api } from '../lib/api';
 
 export const authService = {
-  async signUp(email, password, profileName = 'Main Profile') {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (error) throw error;
-
-    // Create default profile
-    if (data.user) {
-      await profileService.createProfile(data.user.id, profileName);
-    }
-
-    return data;
+  async signUp(email, password, name = '') {
+    const { user, token } = await api.post('/api/auth/register', { email, password, name });
+    localStorage.setItem('authToken', token);
+    return { user, session: { access_token: token } };
   },
 
   async signIn(email, password) {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) throw error;
-    return data;
+    const { user, token } = await api.post('/api/auth/login', { email, password });
+    localStorage.setItem('authToken', token);
+    return { user, session: { access_token: token } };
   },
 
   async signOut() {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    localStorage.removeItem('authToken');
   },
 
   async resetPassword(email) {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-
-    if (error) throw error;
+    return api.post('/api/auth/reset-password', { email });
   },
 
   async updatePassword(newPassword) {
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword,
-    });
-
-    if (error) throw error;
+    return api.put('/api/auth/update', { password: newPassword });
   },
 
   async getSession() {
-    const { data, error } = await supabase.auth.getSession();
-    if (error) throw error;
-    return data.session;
+    const token = localStorage.getItem('authToken');
+    if (!token) return null;
+
+    try {
+      const response = await api.get('/api/auth/session');
+      return { user: response.user, access_token: token };
+    } catch (error) {
+      localStorage.removeItem('authToken');
+      return null;
+    }
   },
 
   async getUser() {
-    const { data: { user }, error } = await supabase.auth.getUser();
-    if (error) throw error;
-    return user;
-  },
+    try {
+      const response = await api.get('/api/auth/session');
+      return response.user;
+    } catch (error) {
+      return null;
+    }
+  }
 };

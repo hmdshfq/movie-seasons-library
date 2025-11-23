@@ -36,7 +36,7 @@ export default function Home() {
 
       // Fetch watched status
       if (profile) {
-        const watched = await movieService.getWatchedMovies(profile.id);
+        const watched = await movieService.getWatchedMovies();
         setWatchedMovies(watched);
       }
 
@@ -54,11 +54,11 @@ export default function Home() {
 
     try {
       if (isWatched) {
-        await movieService.removeWatchedMovie(profile.id, movie.id);
+        await movieService.removeWatchedMovie(movie.id);
         setWatchedMovies((prev) => prev.filter((m) => m.movie_id !== movie.id));
         announce(`Removed ${movie.title || movie.name} from your library`);
       } else {
-        await movieService.addWatchedMovie(profile.id, movie);
+        await movieService.addWatchedMovie(movie);
         const newMovie = {
           movie_id: movie.id,
           title: movie.title || movie.name,

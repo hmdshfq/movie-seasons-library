@@ -18,7 +18,7 @@ export default function ManageProfiles() {
   const handleCreate = async (profileData) => {
     setLoading(true);
     try {
-      await profileService.createProfile(profileData);
+      await profileService.updateProfile(profileData);
       await fetchProfiles();
       setCreating(false);
     } catch (error) {
@@ -31,7 +31,7 @@ export default function ManageProfiles() {
   const handleUpdate = async (profileData) => {
     setLoading(true);
     try {
-      await profileService.updateProfile(editingProfile.id, profileData);
+      await profileService.updateProfile(profileData);
       await fetchProfiles();
       setEditingProfile(null);
     } catch (error) {
@@ -42,14 +42,7 @@ export default function ManageProfiles() {
   };
 
   const handleDelete = async (profile) => {
-    if (!confirm(`Are you sure you want to delete "${profile.name}"?`)) return;
-
-    try {
-      await profileService.deleteProfile(profile.id);
-      await fetchProfiles();
-    } catch (error) {
-      console.error("Error deleting profile:", error);
-    }
+    console.warn("Profile deletion not supported in this version");
   };
 
   if (creating || editingProfile) {

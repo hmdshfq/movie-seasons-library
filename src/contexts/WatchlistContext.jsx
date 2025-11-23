@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from "rea
 import { watchlistService } from "../services/watchlist.service";
 import { useAuth } from "./AuthContext";
 
-const WatchlistContext = createContext();
+export const WatchlistContext = createContext();
 
 
 export function WatchlistProvider({ children }) {
@@ -17,7 +17,7 @@ export function WatchlistProvider({ children }) {
       return;
     }
     setLoading(true);
-    watchlistService.getWatchlist(profile.id)
+    watchlistService.getWatchlist()
       .then((data) => setWatchlist(data))
       .catch(() => setWatchlist([]))
       .finally(() => setLoading(false));
@@ -35,7 +35,7 @@ export function WatchlistProvider({ children }) {
         console.warn("Already in watchlist", movie.id, movie.media_type);
         return;
       }
-      const added = await watchlistService.addToWatchlist(profile.id, movie);
+      const added = await watchlistService.addToWatchlist(movie);
       setWatchlist((prev) => [added, ...prev]);
     } catch (e) {
       console.error("Failed to add to watchlist:", e);
@@ -45,7 +45,7 @@ export function WatchlistProvider({ children }) {
   const removeFromWatchlist = useCallback(async (movieId, mediaType = 'movie') => {
     if (!profile) return;
     try {
-      await watchlistService.removeFromWatchlist(profile.id, movieId, mediaType);
+      await watchlistService.removeFromWatchlist(movieId, mediaType);
       setWatchlist((prev) => prev.filter((m) => !(m.movie_id === movieId && m.media_type === mediaType)));
     } catch (e) {
       // Optionally handle error

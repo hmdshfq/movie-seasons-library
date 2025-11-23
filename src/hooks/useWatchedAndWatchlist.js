@@ -18,7 +18,7 @@ export function useWatchedAndWatchlist() {
       return;
     }
     setLoading(true);
-    movieService.getWatchedMovies(profile.id)
+    movieService.getWatchedMovies()
       .then((data) => setWatched(data))
       .catch(() => setWatched([]))
       .finally(() => setLoading(false));

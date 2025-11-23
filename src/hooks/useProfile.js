@@ -16,7 +16,7 @@ export function useProfile() {
   const fetchPreferences = async () => {
     setLoading(true);
     try {
-      const prefs = await profileService.getPreferences(profile.id);
+      const prefs = await profileService.getPreferences();
       setPreferences(prefs);
     } catch (error) {
       console.error('Error fetching preferences:', error);
@@ -28,7 +28,7 @@ export function useProfile() {
   const updatePreferences = async (newPreferences) => {
     setLoading(true);
     try {
-      const updated = await profileService.updatePreferences(profile.id, newPreferences);
+      const updated = await profileService.updatePreferences(newPreferences);
       setPreferences(updated);
       return updated;
     } catch (error) {
