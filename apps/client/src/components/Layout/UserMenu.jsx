@@ -20,6 +20,14 @@ export default function UserMenu() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  if (!profile) {
+    return (
+      <div className="flex items-center gap-2 p-2">
+        <User size={20} className="text-gray-400" />
+      </div>
+    );
+  }
+
   return (
     <div className="relative" ref={menuRef}>
       <button

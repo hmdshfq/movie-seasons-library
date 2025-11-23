@@ -1,7 +1,7 @@
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Plus, User } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CreateProfileModal from "../Modal/CreateProfileModal";
 
 export default function ProfileSelector() {
@@ -10,10 +10,11 @@ export default function ProfileSelector() {
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   // If only one profile, skip to home
-  if (profiles.length === 1) {
-    navigate("/");
-    return null;
-  }
+  useEffect(() => {
+    if (profiles.length === 1) {
+      navigate("/");
+    }
+  }, [profiles, navigate]);
 
   const handleProfileSelect = () => {
     navigate("/");
