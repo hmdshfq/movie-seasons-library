@@ -231,11 +231,11 @@ pnpm migrate
 
 ### Railway Deployment (Recommended)
 
-This monorepo is configured for single-service deployment on Railway. Railway will:
+This monorepo is configured for single-service deployment on Railway using a `Procfile`. Railway will:
 
-1. Detect `railway.json` configuration
+1. Detect `Procfile` for build and start commands
 2. Install dependencies: `pnpm install`
-3. Build frontend: `pnpm --filter client build`
+3. Build frontend: `pnpm build` (builds both client and server)
 4. Start server: `pnpm start` (Express serves both API and static files)
 
 **Setup on Railway:**
@@ -252,13 +252,18 @@ This monorepo is configured for single-service deployment on Railway. Railway wi
    VITE_TMDB_API_KEY=<your-tmdb-key>
    VITE_TMDB_BASE_URL=https://api.themoviedb.org/3
    ```
-4. Deploy - Railway will automatically run migrations and start the app
+4. Deploy - Railway detects `Procfile` and runs the web process
 5. Visit your Railway app URL to access the frontend
 
 **After first deployment (run migration):**
 ```bash
 # Get a Railway CLI connection or use their web terminal
 pnpm migrate
+```
+
+**Procfile:**
+```
+web: pnpm install && pnpm build && pnpm start
 ```
 
 ### Other Deployment Options
