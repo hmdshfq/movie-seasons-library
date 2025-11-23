@@ -11,27 +11,37 @@ A React + Vite application for tracking and managing movies with a custom Expres
 
 ## Project Structure
 
+This is a monorepo using pnpm workspaces with two main applications:
+
 ```
 movie-library/
-├── src/                      # React frontend
-│   ├── components/           # React components
-│   ├── contexts/             # React contexts (Auth, Watchlist)
-│   ├── lib/                  # Utility libraries (api client)
-│   ├── services/             # API service layer
-│   └── ...
-├── server/                   # Express backend
-│   ├── src/
-│   │   ├── controllers/      # Route handlers
-│   │   ├── middleware/       # Express middleware (auth)
-│   │   ├── routes/           # API routes
-│   │   ├── utils/            # JWT utilities
-│   │   ├── db.js             # Database connection
-│   │   └── index.js          # Express app
-│   ├── db/
-│   │   ├── schema.sql        # Database schema
-│   │   └── migrate.js        # Migration runner
-│   └── package.json
-├── package.json              # Frontend dependencies
+├── apps/
+│   ├── client/                   # React frontend (Vite)
+│   │   ├── src/
+│   │   │   ├── components/       # React components
+│   │   │   ├── contexts/         # React contexts (Auth, Watchlist)
+│   │   │   ├── lib/              # Utility libraries (api client)
+│   │   │   ├── services/         # API service layer
+│   │   │   └── main.jsx
+│   │   ├── index.html
+│   │   ├── vite.config.js
+│   │   ├── tailwind.config.js
+│   │   └── package.json
+│   └── server/                   # Express backend
+│       ├── src/
+│       │   ├── controllers/      # Route handlers
+│       │   ├── middleware/       # Express middleware (auth)
+│       │   ├── routes/           # API routes
+│       │   ├── utils/            # JWT utilities
+│       │   ├── db.js             # Database connection
+│       │   └── index.js          # Express app + static serving
+│       ├── db/
+│       │   ├── schema.sql        # Database schema
+│       │   └── migrate.js        # Migration runner
+│       └── package.json
+├── package.json                  # Root workspace config
+├── pnpm-workspace.yaml          # Workspace definition
+├── railway.json                 # Railway deployment config
 └── README.md
 ```
 
@@ -56,14 +66,18 @@ createdb movie_library
 1. Create a PostgreSQL database on your preferred provider
 2. Copy the connection string
 
-### 2. Backend Setup
+### 2. Install Dependencies (Monorepo)
 
 ```bash
-cd server
-npm install
+# From project root - installs for all apps
+pnpm install
+```
 
-# Create .env file with your database credentials
-cp .env.example .env
+### 3. Backend Setup
+
+```bash
+# Create .env file for backend
+cp .env.example apps/server/.env
 
 # Update .env with your database connection string
 # DATABASE_URL=postgresql://user:password@host:port/movie_library
@@ -72,36 +86,31 @@ cp .env.example .env
 
 Run migrations:
 ```bash
-npm run migrate
+pnpm migrate
 ```
 
-Start the development server:
-```bash
-npm run dev
-```
-
-The server will run on `http://localhost:5000`
-
-### 3. Frontend Setup
+### 4. Frontend Setup
 
 ```bash
-# From project root
-npm install
-
-# Create .env file
-cp .env.example .env
+# Create .env file for frontend
+cp .env.example apps/client/.env
 
 # .env should contain:
 # VITE_API_URL=http://localhost:5000
 # VITE_TMDB_API_KEY=your_api_key
 ```
 
-Start the dev server:
+### 5. Development
+
+Start both frontend and backend with auto-reload:
+
 ```bash
-npm run dev
+# From project root - starts both server and client
+pnpm dev
 ```
 
-The app will run on `http://localhost:5173`
+- Backend: `http://localhost:5000`
+- Frontend: `http://localhost:5173`
 
 ## API Endpoints
 
@@ -182,14 +191,14 @@ The app will run on `http://localhost:5173`
 
 ## Environment Variables
 
-### Frontend (.env)
+### Frontend (apps/client/.env)
 ```
 VITE_API_URL=http://localhost:5000
 VITE_TMDB_API_KEY=your_tmdb_api_key
 VITE_TMDB_BASE_URL=https://api.themoviedb.org/3
 ```
 
-### Backend (server/.env)
+### Backend (apps/server/.env)
 ```
 DATABASE_URL=postgresql://user:password@localhost:5432/movie_library
 JWT_SECRET=dev-secret-key
@@ -200,28 +209,72 @@ CLIENT_URL=http://localhost:5173
 
 ## Development
 
-### Frontend Development
 ```bash
-npm run dev      # Start dev server with HMR
-npm run build    # Build for production
-npm run lint     # Run ESLint
-```
+# Start both frontend and backend with auto-reload
+pnpm dev
 
-### Backend Development
-```bash
-cd server
-npm run dev      # Start server with auto-reload
-npm run migrate  # Run database migrations
+# Or run individually:
+pnpm --filter client dev      # Frontend only
+pnpm --filter server dev      # Backend only
+
+# Build frontend only
+pnpm --filter client build
+
+# Run linting
+pnpm lint
+
+# Run database migrations
+pnpm migrate
 ```
 
 ## Production Deployment
 
-1. Set strong `JWT_SECRET` in backend environment
-2. Update `CLIENT_URL` to production frontend URL
-3. Update `VITE_API_URL` to production API URL
-4. Deploy backend to hosting (Railway, Render, etc.)
-5. Deploy frontend to hosting (Vercel, Netlify, etc.)
-6. Ensure CORS is properly configured in backend
+### Railway Deployment (Recommended)
+
+This monorepo is configured for single-service deployment on Railway. Railway will:
+
+1. Detect `railway.json` configuration
+2. Install dependencies: `pnpm install`
+3. Build frontend: `pnpm --filter client build`
+4. Start server: `pnpm start` (Express serves both API and static files)
+
+**Setup on Railway:**
+
+1. Create Railway project and PostgreSQL database
+2. Link your repository
+3. Set environment variables:
+   ```
+   DATABASE_URL=<railway-postgres-url>
+   JWT_SECRET=<strong-random-secret>
+   JWT_EXPIRY=7d
+   NODE_ENV=production
+   VITE_API_URL=https://<your-railway-app>.up.railway.app
+   VITE_TMDB_API_KEY=<your-tmdb-key>
+   VITE_TMDB_BASE_URL=https://api.themoviedb.org/3
+   ```
+4. Deploy - Railway will automatically run migrations and start the app
+5. Visit your Railway app URL to access the frontend
+
+**After first deployment (run migration):**
+```bash
+# Get a Railway CLI connection or use their web terminal
+pnpm migrate
+```
+
+### Other Deployment Options
+
+For separate deployments:
+
+1. **Backend** (Railway, Render, Heroku):
+   - Root: `apps/server`
+   - Build: `pnpm install && pnpm build`
+   - Start: `pnpm start`
+
+2. **Frontend** (Vercel, Netlify):
+   - Root: `apps/client`
+   - Build: `pnpm build`
+   - Output: `dist/`
+   - Set `VITE_API_URL` to production API URL
 
 ## Migration from Supabase
 
