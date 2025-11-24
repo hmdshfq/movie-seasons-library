@@ -10,6 +10,7 @@ export const useAuth = () => useContext(AuthContext);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [preferences, setPreferences] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -69,10 +70,24 @@ export function AuthProvider({ children }) {
       if (profileData) {
         setProfile(profileData);
         localStorage.setItem("activeProfileId", profileData.id);
+        // Fetch preferences after profile is loaded
+        await fetchPreferences();
       }
     } catch (error) {
       console.warn("Profile fetch error:", error.message);
       setProfile(null);
+    }
+  };
+
+  const fetchPreferences = async () => {
+    try {
+      const prefsData = await profileService.getPreferences();
+      if (prefsData) {
+        setPreferences(prefsData);
+      }
+    } catch (error) {
+      console.warn("Preferences fetch error:", error.message);
+      setPreferences(null);
     }
   };
 
@@ -115,12 +130,22 @@ export function AuthProvider({ children }) {
     return updated;
   };
 
+  const updatePreferences = async (prefs) => {
+    const updated = await profileService.updatePreferences(prefs);
+    if (updated) {
+      setPreferences(updated);
+    }
+    return updated;
+  };
+
   // Fetch profiles (returns array for compatibility, typically just one)
   const fetchProfiles = async () => {
     try {
       const profileData = await profileService.getProfile();
       if (profileData) {
         setProfile(profileData);
+        // Fetch preferences after profile is loaded
+        await fetchPreferences();
       }
     } catch (error) {
       console.warn("Failed to fetch profiles:", error);
@@ -130,12 +155,14 @@ export function AuthProvider({ children }) {
   const value = {
     user,
     profile,
+    preferences,
     profiles: profile ? [profile] : [],
     loading,
     signUp,
     signIn,
     signOut,
     updateProfile,
+    updatePreferences,
     fetchProfile,
     fetchProfiles,
     switchProfile: () => {}, // No-op for single profile mode

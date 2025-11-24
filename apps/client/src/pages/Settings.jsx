@@ -1,13 +1,15 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useProfile } from '../hooks/useProfile';
-import { Save, User, Bell, Shield, Globe } from 'lucide-react';
+import { Save, User, Bell, Shield, Globe, ArrowLeft } from 'lucide-react';
 import Button from '../components/UI/Button';
 import Input from '../components/UI/Input';
 import ErrorMessage from '../components/UI/ErrorMessage';
 import { authService } from '../services/auth.service';
 
 export default function Settings() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { profile, preferences, updatePreferences } = useProfile();
   const [activeSection, setActiveSection] = useState('account');
@@ -26,7 +28,8 @@ export default function Settings() {
     language: preferences?.language || 'en',
     autoplay: preferences?.autoplay ?? true,
     notifications: preferences?.notifications ?? true,
-    showMatureContent: preferences?.showMatureContent ?? true
+    showMatureContent: preferences?.showMatureContent ?? true,
+    hide_horror: preferences?.hide_horror ?? false
   });
 
   const handleAccountUpdate = async (e) => {
@@ -82,8 +85,17 @@ export default function Settings() {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">Settings</h1>
+    <div className="min-h-screen bg-slate-900 text-gray-100">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold">Settings</h1>
+          <Button
+            onClick={() => navigate(-1)}
+            variant="secondary"
+            icon={ArrowLeft}>
+            Back
+          </Button>
+        </div>
 
       <div className="flex flex-col md:flex-row gap-8">
         {/* Sidebar */}
@@ -252,6 +264,26 @@ export default function Settings() {
                       </p>
                     </div>
                   </label>
+
+                  <label className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={preferencesForm.hide_horror}
+                      onChange={(e) =>
+                        setPreferencesForm((prev) => ({
+                          ...prev,
+                          hide_horror: e.target.checked,
+                        }))
+                      }
+                      className="w-5 h-5 rounded border-gray-600 bg-slate-700 text-indigo-600"
+                    />
+                    <div>
+                      <span className="font-medium">Hide horror movies</span>
+                      <p className="text-sm text-gray-400">
+                        Remove horror movies from search results
+                      </p>
+                    </div>
+                  </label>
                 </div>
 
                 <Button
@@ -268,6 +300,7 @@ export default function Settings() {
             {/* Other sections... */}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

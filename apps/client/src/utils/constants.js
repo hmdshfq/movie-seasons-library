@@ -61,3 +61,6 @@ export const SORT_OPTIONS = [
 // Kids Content Filters
 export const KIDS_SAFE_GENRES = ['16', '10751', '12', '35']; // Animation, Family, Adventure, Comedy
 export const KIDS_MAX_RATING = 'PG-13';
+
+// Genre Filter Constants
+export const HORROR_GENRE_ID = '27';

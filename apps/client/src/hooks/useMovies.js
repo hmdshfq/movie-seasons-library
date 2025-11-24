@@ -3,7 +3,7 @@ import { tmdbService } from "../services/tmdb.service";
 import { useAuth } from "../contexts/AuthContext";
 
 export function useMovies() {
-  const { profile } = useAuth();
+  const { profile, preferences } = useAuth();
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -12,9 +12,11 @@ export function useMovies() {
     setLoading(true);
     try {
       const isKidsProfile = profile?.is_kids || false;
+      const hideHorror = preferences?.hide_horror || false;
       const { results, total } = await tmdbService.discoverMovies(
         { ...filters, page },
         isKidsProfile,
+        hideHorror,
       );
       setMovies(results);
       return { results, total };
@@ -52,7 +54,8 @@ export function useMovies() {
     setLoading(true);
     try {
       const isKidsProfile = profile?.is_kids || false;
-      const movies = await tmdbService.getRandomMovie(mediaType, isKidsProfile);
+      const hideHorror = preferences?.hide_horror || false;
+      const movies = await tmdbService.getRandomMovie(mediaType, isKidsProfile, hideHorror);
       if (movies && movies.length > 0) {
         setMovies(movies);
         return movies;

@@ -160,7 +160,7 @@ export const getPreferences = async (req, res) => {
 
 export const updatePreferences = async (req, res) => {
   try {
-    const { favorite_genres, language } = req.body;
+    const { favorite_genres, language, hide_horror } = req.body;
 
     const profileResult = await query(
       'SELECT id FROM profiles WHERE user_id = $1',
@@ -175,10 +175,11 @@ export const updatePreferences = async (req, res) => {
       `UPDATE user_preferences SET
         favorite_genres = COALESCE($1, favorite_genres),
         language = COALESCE($2, language),
+        hide_horror = COALESCE($3, hide_horror),
         updated_at = NOW()
-       WHERE profile_id = $3
+       WHERE profile_id = $4
        RETURNING *`,
-      [favorite_genres, language, profileResult.rows[0].id]
+      [favorite_genres, language, hide_horror, profileResult.rows[0].id]
     );
 
     res.json(result.rows[0]);

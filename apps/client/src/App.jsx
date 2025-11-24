@@ -12,6 +12,7 @@ import Signup from "./pages/Signup";
 import Profiles from "./pages/Profiles";
 import Home from "./pages/Home";
 import ManageProfiles from "./pages/ManageProfiles";
+import Settings from "./pages/Settings";
 import { WatchlistProvider } from "./contexts/WatchlistContext";
 import Watchlist from "./pages/Watchlist";
 
@@ -36,7 +37,8 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/profiles" element={<Profiles />} />
               <Route path="/manage-profiles" element={<ManageProfiles />} />
-              <Route element={<Layout />}> 
+              <Route path="/settings" element={<Settings />} />
+              <Route element={<Layout />}>
                 <Route path="/" element={<Home />} />
                 <Route path="/library" element={<Home />} />
                 <Route path="/watchlist" element={<Watchlist />} />

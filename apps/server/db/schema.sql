@@ -49,9 +49,13 @@ CREATE TABLE IF NOT EXISTS user_preferences (
   profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   favorite_genres TEXT[],
   language VARCHAR(50),
+  hide_horror BOOLEAN DEFAULT FALSE,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(profile_id)
 );
+
+-- Add new columns to existing tables if they don't exist
+ALTER TABLE user_preferences ADD COLUMN IF NOT EXISTS hide_horror BOOLEAN DEFAULT FALSE;
 
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles(user_id);

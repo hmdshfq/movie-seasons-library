@@ -1,5 +1,5 @@
 import tmdb from "../lib/tmdb";
-import { KIDS_SAFE_GENRES } from "../utils/constants";
+import { KIDS_SAFE_GENRES, HORROR_GENRE_ID } from "../utils/constants";
 
 export const tmdbService = {
   async getMovieDetails(movieId) {
@@ -34,13 +34,13 @@ export const tmdbService = {
     return results.results;
   },
 
-  async discoverMovies(params, isKidsProfile = false) {
+  async discoverMovies(params, isKidsProfile = false, hideHorror = false) {
     const modifiedParams = { ...params };
 
     // Map component filters to TMDB API parameters
     if (modifiedParams.mediaType === "tv") {
       delete modifiedParams.mediaType;
-      return this.discoverTVShows(modifiedParams, isKidsProfile);
+      return this.discoverTVShows(modifiedParams, isKidsProfile, hideHorror);
     }
 
     // Remove mediaType for movie discovery
@@ -86,11 +86,15 @@ export const tmdbService = {
       modifiedParams["certification.lte"] = "PG-13";
     }
 
+    if (hideHorror) {
+      modifiedParams.without_genres = HORROR_GENRE_ID;
+    }
+
     const results = await tmdb.discoverMovies(modifiedParams);
     return { results: results.results, total: results.total_results };
   },
 
-  async discoverTVShows(params, isKidsProfile = false) {
+  async discoverTVShows(params, isKidsProfile = false, hideHorror = false) {
     const modifiedParams = { ...params };
 
     // Remove mediaType for TV discovery
@@ -134,6 +138,10 @@ export const tmdbService = {
       modifiedParams.with_genres = KIDS_SAFE_GENRES.join(",");
     }
 
+    if (hideHorror) {
+      modifiedParams.without_genres = HORROR_GENRE_ID;
+    }
+
     const results = await tmdb.discoverTVShows(modifiedParams);
     return { results: results.results, total: results.total_results };
   },
@@ -152,7 +160,7 @@ export const tmdbService = {
     return type === "movie" ? tmdb.getMovieGenres() : tmdb.getTVGenres();
   },
 
-  async getRandomMovie(mediaType = "movie", isKidsProfile = false) {
+  async getRandomMovie(mediaType = "movie", isKidsProfile = false, hideHorror = false) {
     try {
       // Generate a random page number between 1 and 10 to get variety
       const randomPage = Math.floor(Math.random() * 10) + 1;
@@ -171,6 +179,10 @@ export const tmdbService = {
           params.with_genres = KIDS_SAFE_GENRES.join(",");
         }
 
+        if (hideHorror) {
+          params.without_genres = HORROR_GENRE_ID;
+        }
+
         results = await tmdb.discoverTVShows(params);
       } else {
         // Use discover movies
@@ -184,6 +196,10 @@ export const tmdbService = {
           params.with_genres = KIDS_SAFE_GENRES.join(",");
           params.certification_country = "US";
           params["certification.lte"] = "PG-13";
+        }
+
+        if (hideHorror) {
+          params.without_genres = HORROR_GENRE_ID;
         }
 
         results = await tmdb.discoverMovies(params);

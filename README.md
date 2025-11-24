@@ -96,7 +96,7 @@ pnpm migrate
 cp .env.example apps/client/.env
 
 # .env should contain:
-# VITE_API_URL=http://localhost:5000
+# VITE_API_URL=http://localhost:5001
 # VITE_TMDB_API_KEY=your_api_key
 ```
 
@@ -109,7 +109,7 @@ Start both frontend and backend with auto-reload:
 pnpm dev
 ```
 
-- Backend: `http://localhost:5000`
+- Backend: `http://localhost:5001`
 - Frontend: `http://localhost:5173`
 
 ## API Endpoints
@@ -193,7 +193,7 @@ pnpm dev
 
 ### Frontend (apps/client/.env)
 ```
-VITE_API_URL=http://localhost:5000
+VITE_API_URL=http://localhost:5001
 VITE_TMDB_API_KEY=your_tmdb_api_key
 VITE_TMDB_BASE_URL=https://api.themoviedb.org/3
 ```
@@ -203,7 +203,7 @@ VITE_TMDB_BASE_URL=https://api.themoviedb.org/3
 DATABASE_URL=postgresql://user:password@localhost:5432/movie_library
 JWT_SECRET=dev-secret-key
 JWT_EXPIRY=7d
-PORT=5000
+PORT=5001
 CLIENT_URL=http://localhost:5173
 ```
 
