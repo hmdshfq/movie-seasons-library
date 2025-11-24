@@ -10,6 +10,7 @@ export default function MovieDetailsModal({
   movie,
   isWatched,
   onToggleWatched,
+  onRemoveMovie,
 }) {
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
   const modalRef = useRef(null);
@@ -185,27 +186,37 @@ export default function MovieDetailsModal({
 
               <div className="flex gap-4">
                 <Button
-                  onClick={() => onToggleWatched(movie)}
+                  onClick={async () => {
+                    await onToggleWatched(movie);
+                    // Delay modal close to allow animation to play
+                    setTimeout(onClose, 300);
+                  }}
                   variant={isWatched(movie.id) ? "secondary" : "primary"}
                   icon={isWatched(movie.id) ? Check : Plus}
                 >
                   {isWatched(movie.id) ? "Watched" : "Add to Watched"}
                 </Button>
                 <Button
-                  onClick={() =>
-                    isInWatchlist(movie.id)
-                      ? removeFromWatchlist(
-                          movie.id,
+                  onClick={async () => {
+                    if (isInWatchlist(movie.id)) {
+                      await removeFromWatchlist(
+                        movie.id,
+                        movie.media_type ||
+                          (movie.first_air_date ? "tv" : "movie"),
+                      );
+                      onClose();
+                    } else {
+                      onRemoveMovie?.(movie.id);
+                      await addToWatchlist({
+                        ...movie,
+                        media_type:
                           movie.media_type ||
-                            (movie.first_air_date ? "tv" : "movie"),
-                        )
-                      : addToWatchlist({
-                          ...movie,
-                          media_type:
-                            movie.media_type ||
-                            (movie.first_air_date ? "tv" : "movie"),
-                        })
-                  }
+                          (movie.first_air_date ? "tv" : "movie"),
+                      });
+                      // Delay modal close to allow animation to play
+                      setTimeout(onClose, 300);
+                    }
+                  }}
                   variant={isInWatchlist(movie.id) ? "secondary" : "primary"}
                   icon={isInWatchlist(movie.id) ? Check : Plus}
                 >

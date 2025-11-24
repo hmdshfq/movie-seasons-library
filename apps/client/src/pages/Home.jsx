@@ -27,8 +27,13 @@ export default function Home() {
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [watchedMovies, setWatchedMovies] = useState([]);
+  const [movieToRemove, setMovieToRemove] = useState(null);
 
-  const showMovieDetails = async (movie) => {
+  const handleRemoveMovie = (movieId) => {
+    setMovieToRemove(movieId);
+  };
+
+  const showMovieDetails = async (movie, onRemove) => {
     try {
       const mediaType = movie.media_type || (movie.first_air_date ? 'tv' : 'movie');
       const fullMovie = mediaType === 'tv'
@@ -70,6 +75,8 @@ export default function Home() {
         };
         setWatchedMovies((prev) => [...prev, newMovie]);
         announce(`Added ${movie.title || movie.name} to your library`);
+        // Trigger removal animation in discover page
+        handleRemoveMovie(movie.id);
       }
     } catch (error) {
       console.error("Error toggling watched status:", error);
@@ -84,7 +91,7 @@ export default function Home() {
   return (
     <>
       {tab === "discover" && (
-        <DiscoverTab announce={announce} showMovieDetails={showMovieDetails} />
+        <DiscoverTab announce={announce} showMovieDetails={showMovieDetails} movieToRemove={movieToRemove} onMovieRemoveHandled={() => setMovieToRemove(null)} />
       )}
 
       {tab === "library" && <LibraryTab showMovieDetails={showMovieDetails} />}
@@ -102,6 +109,7 @@ export default function Home() {
         movie={selectedMovie}
         isWatched={isWatched}
         onToggleWatched={toggleWatched}
+        onRemoveMovie={handleRemoveMovie}
       />
     </>
   );

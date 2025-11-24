@@ -1,12 +1,34 @@
 import { Star } from "lucide-react";
 import { IMG_BASE_URL } from "../../utils/constants";
+import { useState, useEffect } from "react";
 
-export default function MovieCard({ movie, onClick }) {
+export default function MovieCard({ movie, onClick, onRemove, isMarkedForRemoval }) {
+  const [isRemoving, setIsRemoving] = useState(false);
+
+  useEffect(() => {
+    if (isMarkedForRemoval) {
+      setIsRemoving(true);
+      const timeout = setTimeout(() => {
+        onRemove?.(movie.id);
+      }, 300);
+      return () => clearTimeout(timeout);
+    }
+  }, [isMarkedForRemoval, movie.id, onRemove]);
+
+  const handleRemove = () => {
+    setIsRemoving(true);
+    setTimeout(() => {
+      onRemove?.(movie.id);
+    }, 300);
+  };
+
   return (
     <article
-      onClick={() => onClick(movie)}
-      onKeyPress={(e) => e.key === "Enter" && onClick(movie)}
-      className="bg-slate-800 rounded-lg overflow-hidden cursor-pointer hover-lift shadow-lg"
+      onClick={() => onClick(movie, handleRemove)}
+      onKeyPress={(e) => e.key === "Enter" && onClick(movie, handleRemove)}
+      className={`bg-slate-800 rounded-lg overflow-hidden cursor-pointer hover-lift shadow-lg transition-all duration-300 ${
+        isRemoving ? "scale-0 opacity-0" : "scale-100 opacity-100"
+      }`}
       tabIndex={0}
       role="listitem"
       aria-label={`${

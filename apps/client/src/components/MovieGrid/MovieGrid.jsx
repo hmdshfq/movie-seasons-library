@@ -1,6 +1,6 @@
 import MovieCard from "./MovieCard";
 
-export default function MovieGrid({ movies, onMovieClick }) {
+export default function MovieGrid({ movies, onMovieClick, onRemoveMovie, removedMovieIds }) {
   if (!movies || movies.length === 0) {
     return (
       <p className="text-center text-gray-400 py-12">
@@ -15,7 +15,13 @@ export default function MovieGrid({ movies, onMovieClick }) {
       role="list"
       aria-label="Movie results">
       {movies.map((movie) => (
-        <MovieCard key={movie.id} movie={movie} onClick={onMovieClick} />
+        <MovieCard
+          key={movie.id}
+          movie={movie}
+          onClick={onMovieClick}
+          onRemove={onRemoveMovie}
+          isMarkedForRemoval={removedMovieIds?.has(movie.id)}
+        />
       ))}
     </div>
   );

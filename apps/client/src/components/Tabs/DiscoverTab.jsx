@@ -11,7 +11,7 @@ import MediaTypeToggle from "../UI/MediaTypeToggle";
 import { GENRES, YEARS, SORT_OPTIONS, HORROR_GENRE_ID } from "../../utils/constants";
 import { useWatchedAndWatchlist } from "../../hooks/useWatchedAndWatchlist";
 
-export default function DiscoverTab({ announce, showMovieDetails }) {
+export default function DiscoverTab({ announce, showMovieDetails, movieToRemove, onMovieRemoveHandled }) {
   const { movies, loading, discoverMovies, searchMovies, getRandomMovie } =
     useMovies();
   const { preferences } = useProfile();
@@ -21,6 +21,7 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [removedMovies, setRemovedMovies] = useState(new Set());
   const observerTarget = useRef(null);
   const MOVIES_PER_PAGE = 18;
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,8 +33,29 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
     minRating: 0,
   });
 
+  const handleRemoveMovie = (movieId) => {
+    setRemovedMovies((prev) => new Set([...prev, movieId]));
+    // Remove from allMovies after animation completes
+    setTimeout(() => {
+      setAllMovies((prev) => prev.filter((movie) => movie.id !== movieId));
+      setRemovedMovies((prev) => {
+        const updated = new Set(prev);
+        updated.delete(movieId);
+        return updated;
+      });
+    }, 350);
+  };
+
   const debouncedSearch = useDebounce(searchQuery, 500);
   const debouncedRating = useDebounce(filters.minRating, 300);
+
+  // Handle movie removal when passed from parent
+  useEffect(() => {
+    if (movieToRemove) {
+      handleRemoveMovie(movieToRemove);
+      onMovieRemoveHandled?.();
+    }
+  }, [movieToRemove, onMovieRemoveHandled]);
 
   useEffect(() => {
     if (debouncedSearch) {
@@ -155,7 +177,11 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
   };
 
   const getFilteredMovies = () => {
-    if (!allMovies || (watched.length === 0 && watchlist.length === 0)) {
+    if (!allMovies) {
+      return allMovies;
+    }
+
+    if (watched.length === 0 && watchlist.length === 0) {
       return allMovies;
     }
 
@@ -376,7 +402,7 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
         </p>
       ) : (
         <>
-          <MovieGrid movies={getFilteredMovies()} onMovieClick={showMovieDetails} />
+          <MovieGrid movies={getFilteredMovies()} onMovieClick={showMovieDetails} onRemoveMovie={handleRemoveMovie} removedMovieIds={removedMovies} />
           {/* Infinite scroll trigger */}
           <div ref={observerTarget} className="py-8" aria-live="polite">
             {isLoadingMore && (
