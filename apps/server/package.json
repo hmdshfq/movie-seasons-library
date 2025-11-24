@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "echo 'Building frontend...' && pnpm --filter client build",
+    "build": "echo 'Building frontend...' && pnpm --filter movie-library-client build",
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "migrate": "node db/migrate.js"

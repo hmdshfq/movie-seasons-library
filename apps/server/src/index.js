@@ -47,12 +47,6 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Error handler
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ error: 'Internal server error' });
-});
-
 // Serve static frontend files
 const frontendPath = path.join(__dirname, '../../client/dist');
 app.use(express.static(frontendPath));
@@ -60,6 +54,12 @@ app.use(express.static(frontendPath));
 // SPA fallback - serve index.html for all non-API routes
 app.use((req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));
+});
+
+// Error handler (must be last)
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 app.listen(PORT, () => {
