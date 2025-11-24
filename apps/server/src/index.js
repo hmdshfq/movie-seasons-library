@@ -49,11 +49,16 @@ app.get('/health', (req, res) => {
 
 // Serve static frontend files
 const frontendPath = path.join(__dirname, '../../client/dist');
+console.log('Serving frontend from:', frontendPath);
 app.use(express.static(frontendPath));
 
 // SPA fallback - serve index.html for all non-API routes
-app.use((req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'));
+app.use((req, res, next) => {
+  res.sendFile(path.join(frontendPath, 'index.html'), (err) => {
+    if (err) {
+      next(err);
+    }
+  });
 });
 
 // Error handler (must be last)
