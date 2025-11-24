@@ -12,12 +12,12 @@ export function useMovies() {
     setLoading(true);
     try {
       const isKidsProfile = profile?.is_kids || false;
-      const results = await tmdbService.discoverMovies(filters, isKidsProfile);
-      const start = (page - 1) * MOVIES_PER_PAGE;
-      const end = start + MOVIES_PER_PAGE;
-      const paged = Array.isArray(results) ? results.slice(start, end) : [];
-      setMovies(paged);
-      return { results: paged, total: Array.isArray(results) ? results.length : 0 };
+      const { results, total } = await tmdbService.discoverMovies(
+        { ...filters, page },
+        isKidsProfile,
+      );
+      setMovies(results);
+      return { results, total };
     } catch (error) {
       console.error("Error fetching movies:", error);
       setMovies([]);
@@ -34,14 +34,11 @@ export function useMovies() {
     try {
       const isKidsProfile = profile?.is_kids || false;
       const results = await tmdbService.searchMovies(
-        { query, mediaType },
+        { query, mediaType, page },
         isKidsProfile,
       );
-      const start = (page - 1) * MOVIES_PER_PAGE;
-      const end = start + MOVIES_PER_PAGE;
-      const paged = Array.isArray(results) ? results.slice(start, end) : [];
-      setMovies(paged);
-      return { results: paged, total: Array.isArray(results) ? results.length : 0 };
+      setMovies(results.results || results);
+      return results.total ? results : { results, total: 0 };
     } catch (error) {
       console.error("Error searching movies:", error);
       setMovies([]);

@@ -30,8 +30,8 @@ class TMDBClient {
     return this.request(`/movie/${movieId}`);
   }
 
-  async searchMovies(query) {
-    return this.request('/search/movie', { query });
+  async searchMovies(query, page = 1) {
+    return this.request('/search/movie', { query, page });
   }
 
   async discoverMovies(params) {
@@ -47,8 +47,8 @@ class TMDBClient {
     return this.request(`/tv/${tvId}`);
   }
 
-  async searchTVShows(query) {
-    return this.request('/search/tv', { query });
+  async searchTVShows(query, page = 1) {
+    return this.request('/search/tv', { query, page });
   }
 
   async discoverTVShows(params) {

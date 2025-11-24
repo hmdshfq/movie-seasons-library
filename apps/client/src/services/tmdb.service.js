@@ -11,20 +11,17 @@ export const tmdbService = {
   },
 
   async searchMovies(params, isKidsProfile = false) {
-    const { query, mediaType } = params;
+    const { query, mediaType, page = 1 } = params;
 
     let results;
     if (mediaType === "tv") {
-      results = await tmdb.searchTVShows(query);
+      results = await tmdb.searchTVShows(query, page);
     } else {
-      results = await tmdb.searchMovies(query);
+      results = await tmdb.searchMovies(query, page);
     }
 
-    if (isKidsProfile) {
-      return filterKidsContent(results.results);
-    }
-
-    return results.results;
+    const filtered = isKidsProfile ? filterKidsContent(results.results) : results.results;
+    return { results: filtered, total: results.total_results };
   },
 
   async searchTVShows(query, isKidsProfile = false) {
@@ -90,7 +87,7 @@ export const tmdbService = {
     }
 
     const results = await tmdb.discoverMovies(modifiedParams);
-    return results.results;
+    return { results: results.results, total: results.total_results };
   },
 
   async discoverTVShows(params, isKidsProfile = false) {
@@ -138,7 +135,7 @@ export const tmdbService = {
     }
 
     const results = await tmdb.discoverTVShows(modifiedParams);
-    return results.results;
+    return { results: results.results, total: results.total_results };
   },
 
   async getRecommendations(movieId, isKidsProfile = false) {

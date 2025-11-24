@@ -11,7 +11,7 @@ export default function MovieGrid({ movies, onMovieClick }) {
 
   return (
     <div
-      className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6"
+      className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6"
       role="list"
       aria-label="Movie results">
       {movies.map((movie) => (
