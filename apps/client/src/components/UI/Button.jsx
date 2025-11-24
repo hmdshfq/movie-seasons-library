@@ -25,7 +25,7 @@ export default function Button({
       onClick={onClick}
       type={type}
       disabled={disabled || loading}
-      className={`spring-button px-8 py-3 rounded-full font-semibold flex items-center gap-2 ${variants[variant]} ${widthClass}`}
+      className={`spring-button px-4 py-2 sm:px-8 sm:py-3 rounded-full font-semibold flex items-center gap-2 whitespace-nowrap ${variants[variant]} ${widthClass}`}
       aria-label={ariaLabel}
       {...props}>
       {Icon && <Icon size={20} aria-hidden="true" />}

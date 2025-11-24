@@ -50,7 +50,7 @@ export default function UserMenu() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-slate-800 rounded-lg shadow-2xl border border-slate-700 py-2">
+        <div className="absolute right-0 mt-2 w-56 sm:w-64 bg-slate-800 rounded-lg shadow-2xl border border-slate-700 py-2">
           {/* Profile Switcher */}
           <div className="px-4 py-2 border-b border-slate-700">
             <p className="text-xs text-gray-400 mb-2">Switch Profile</p>

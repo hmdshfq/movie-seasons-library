@@ -241,7 +241,7 @@ export default function RecommendationsTab({ showMovieDetails, announce }) {
       aria-label="Personalized recommendations"
     >
       <div className="bg-slate-800 rounded-2xl p-6 mb-8 shadow-2xl">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
           <h2 className="text-2xl font-bold">Recommended For You</h2>
           <Button
             onClick={getRecommendations}

@@ -19,6 +19,7 @@ movie-library/
 │   ├── client/                   # React frontend (Vite)
 │   │   ├── src/
 │   │   │   ├── components/       # React components
+│   │   │   │   ├── Layout/       # Header, navigation (responsive)
 │   │   │   │   ├── MovieGrid/    # Movie display grid component
 │   │   │   │   ├── MovieCarousel/# Scrollable carousel for recommendations
 │   │   │   │   ├── Tabs/         # Tab components (Discover, Library, Recommendations)
@@ -26,6 +27,7 @@ movie-library/
 │   │   │   ├── contexts/         # React contexts (Auth, Watchlist)
 │   │   │   ├── lib/              # Utility libraries (api client)
 │   │   │   ├── services/         # API service layer
+│   │   │   ├── utils/            # Utility functions (icons, helpers)
 │   │   │   └── main.jsx
 │   │   ├── index.html
 │   │   ├── vite.config.js
@@ -177,6 +179,32 @@ The app provides personalized movie recommendations based on user activity and p
 - `getSimilarMovies()` - Get movies similar to a specific movie
 - `getTrendingMovies()` - Fetch trending movies for a time window
 - `discoverByGenreAndRating()` - Find highly-rated movies in specific genres
+
+## Responsive Design
+
+Navigation adapts seamlessly across all device sizes:
+
+### Desktop (lg: 1024px+)
+- Full navigation with labels and icons
+- All tabs visible with descriptive labels
+- User menu with expanded profile view
+
+### Tablet (sm: 640px - md: 768px)
+- Icon-only navigation buttons
+- Hover tooltips show tab labels
+- Compact spacing to preserve screen real estate
+
+### Mobile (< 640px)
+- Hamburger menu (Menu/X icon)
+- Slide-out navigation drawer with full-width buttons
+- Simplified header layout (logo + hamburger)
+- Touch-friendly button sizes (min 44px)
+- Overlay backdrop when menu is open
+
+### Components
+- **Header** (`apps/client/src/components/Layout/Header.jsx`): Responsive layout with breakpoint-specific navigation
+- **MobileNav** (`apps/client/src/components/Layout/MobileNav.jsx`): Hamburger menu and slide-out drawer for mobile
+- **navIcons** (`apps/client/src/utils/navIcons.js`): Icon mapping utility for navigation buttons
 
 ## Authentication Flow
 
