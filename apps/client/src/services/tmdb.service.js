@@ -46,6 +46,9 @@ export const tmdbService = {
     // Remove mediaType for movie discovery
     delete modifiedParams.mediaType;
 
+    // Check if user explicitly selected Horror genre (and genre is not empty)
+    const userSelectedHorror = modifiedParams.genre && modifiedParams.genre === HORROR_GENRE_ID;
+
     // Map genre filter
     if (modifiedParams.genre) {
       modifiedParams.with_genres = modifiedParams.genre;
@@ -86,7 +89,8 @@ export const tmdbService = {
       modifiedParams["certification.lte"] = "PG-13";
     }
 
-    if (hideHorror) {
+    // Only apply horror filter if hideHorror is enabled and user didn't explicitly select Horror genre
+    if (hideHorror && !userSelectedHorror) {
       modifiedParams.without_genres = HORROR_GENRE_ID;
     }
 
@@ -99,6 +103,9 @@ export const tmdbService = {
 
     // Remove mediaType for TV discovery
     delete modifiedParams.mediaType;
+
+    // Check if user explicitly selected Horror genre (and genre is not empty)
+    const userSelectedHorror = modifiedParams.genre && modifiedParams.genre === HORROR_GENRE_ID;
 
     // Map genre filter
     if (modifiedParams.genre) {
@@ -138,7 +145,8 @@ export const tmdbService = {
       modifiedParams.with_genres = KIDS_SAFE_GENRES.join(",");
     }
 
-    if (hideHorror) {
+    // Only apply horror filter if hideHorror is enabled and user didn't explicitly select Horror genre
+    if (hideHorror && !userSelectedHorror) {
       modifiedParams.without_genres = HORROR_GENRE_ID;
     }
 

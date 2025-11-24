@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useProfile } from '../hooks/useProfile';
-import { Save, User, Bell, Shield, Globe, ArrowLeft } from 'lucide-react';
+import { Save, User, Globe, ArrowLeft } from 'lucide-react';
 import Button from '../components/UI/Button';
 import Input from '../components/UI/Input';
 import ErrorMessage from '../components/UI/ErrorMessage';
@@ -31,6 +31,19 @@ export default function Settings() {
     showMatureContent: preferences?.showMatureContent ?? true,
     hide_horror: preferences?.hide_horror ?? false
   });
+
+  // Sync form when preferences change
+  useEffect(() => {
+    if (preferences) {
+      setPreferencesForm({
+        language: preferences.language || 'en',
+        autoplay: preferences.autoplay ?? true,
+        notifications: preferences.notifications ?? true,
+        showMatureContent: preferences.showMatureContent ?? true,
+        hide_horror: preferences.hide_horror ?? false
+      });
+    }
+  }, [preferences]);
 
   const handleAccountUpdate = async (e) => {
     e.preventDefault();
@@ -80,8 +93,6 @@ export default function Settings() {
   const sections = [
     { id: "account", label: "Account", icon: User },
     { id: "preferences", label: "Preferences", icon: Globe },
-    { id: "notifications", label: "Notifications", icon: Bell },
-    { id: "privacy", label: "Privacy & Safety", icon: Shield },
   ];
 
   return (

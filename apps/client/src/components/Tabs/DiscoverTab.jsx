@@ -2,17 +2,19 @@ import { useState, useEffect } from "react";
 import { Search, Shuffle } from "lucide-react";
 import { useMovies } from "../../hooks/useMovies";
 import { useDebounce } from "../../hooks/useDebounce";
+import { useProfile } from "../../hooks/useProfile";
 import MovieGrid from "../MovieGrid/MovieGrid";
 import LoadingSpinner from "../UI/LoadingSpinner";
 import Button from "../UI/Button";
 import RatingSlider from "../UI/RatingSlider";
 import MediaTypeToggle from "../UI/MediaTypeToggle";
-import { GENRES, YEARS, SORT_OPTIONS } from "../../utils/constants";
+import { GENRES, YEARS, SORT_OPTIONS, HORROR_GENRE_ID } from "../../utils/constants";
 import { useWatchedAndWatchlist } from "../../hooks/useWatchedAndWatchlist";
 
 export default function DiscoverTab({ announce, showMovieDetails }) {
   const { movies, loading, discoverMovies, searchMovies, getRandomMovie } =
     useMovies();
+  const { preferences } = useProfile();
   const { watched, watchlist } = useWatchedAndWatchlist();
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -210,11 +212,17 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
                 onChange={(e) => handleFilterChange("genre", e.target.value)}
                 className="w-full px-4 py-2 bg-slate-700 rounded-lg border-2 border-transparent focus:border-indigo-500 focus:outline-none transition-all"
               >
-                {GENRES.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.name}
-                  </option>
-                ))}
+                {GENRES.map((g) => {
+                  // Hide Horror genre if hide_horror preference is enabled
+                  if (preferences?.hide_horror && g.id === HORROR_GENRE_ID) {
+                    return null;
+                  }
+                  return (
+                    <option key={g.id} value={g.id}>
+                      {g.name}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
