@@ -55,7 +55,7 @@ export default function MovieDetailsModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4 animate-fadeIn"
+      className="fixed inset-0 bg-black/40 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fadeIn"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -132,10 +132,24 @@ export default function MovieDetailsModal({
                   </span>
                 )}
 
+                {movie.episode_run_time && movie.episode_run_time.length > 0 && (
+                  <span className="flex items-center gap-1 text-gray-300">
+                    <Clock size={16} />
+                    {movie.episode_run_time[0]} min/ep
+                  </span>
+                )}
+
                 {movie.release_date && (
                   <span className="flex items-center gap-1 text-gray-300">
                     <Calendar size={16} />
                     {new Date(movie.release_date).getFullYear()}
+                  </span>
+                )}
+
+                {movie.first_air_date && (
+                  <span className="flex items-center gap-1 text-gray-300">
+                    <Calendar size={16} />
+                    {new Date(movie.first_air_date).getFullYear()}
                   </span>
                 )}
 

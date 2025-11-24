@@ -30,7 +30,10 @@ export default function Home() {
 
   const showMovieDetails = async (movie) => {
     try {
-      const fullMovie = await tmdbService.getMovieDetails(movie.id);
+      const mediaType = movie.media_type || (movie.first_air_date ? 'tv' : 'movie');
+      const fullMovie = mediaType === 'tv'
+        ? await tmdbService.getTVShowDetails(movie.id)
+        : await tmdbService.getMovieDetails(movie.id);
       setSelectedMovie(fullMovie);
       setModalOpen(true);
 

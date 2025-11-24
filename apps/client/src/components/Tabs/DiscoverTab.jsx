@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, Shuffle } from "lucide-react";
 import { useMovies } from "../../hooks/useMovies";
 import { useDebounce } from "../../hooks/useDebounce";
@@ -16,9 +16,12 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
     useMovies();
   const { preferences } = useProfile();
   const { watched, watchlist } = useWatchedAndWatchlist();
-  // Pagination state
+  // Infinite scroll state
+  const [allMovies, setAllMovies] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const observerTarget = useRef(null);
   const MOVIES_PER_PAGE = 18;
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
@@ -48,6 +51,9 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
   }, [debouncedRating]);
 
   const applyFiltersWithDebouncedRating = async (page = 1) => {
+    if (page === 1) {
+      setAllMovies([]);
+    }
     setCurrentPage(page);
     const filtersWithDebouncedRating = {
       ...filters,
@@ -60,10 +66,18 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
       MOVIES_PER_PAGE,
     );
     setTotalResults(total || 0);
-    announce(`Found ${total || (results ? results.length : 0)} results`);
+    if (page === 1) {
+      setAllMovies(results || []);
+      announce(`Found ${total || (results ? results.length : 0)} results`);
+    } else {
+      setAllMovies((prev) => [...prev, ...(results || [])]);
+    }
   };
 
   const applyFilters = async (page = 1) => {
+    if (page === 1) {
+      setAllMovies([]);
+    }
     setCurrentPage(page);
     // Clear search query when applying filters
     if (searchQuery.trim()) {
@@ -76,10 +90,18 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
       MOVIES_PER_PAGE,
     );
     setTotalResults(total || 0);
-    announce(`Found ${total || (results ? results.length : 0)} results`);
+    if (page === 1) {
+      setAllMovies(results || []);
+      announce(`Found ${total || (results ? results.length : 0)} results`);
+    } else {
+      setAllMovies((prev) => [...prev, ...(results || [])]);
+    }
   };
 
   const handleSearch = async (page = 1) => {
+    if (page === 1) {
+      setAllMovies([]);
+    }
     setCurrentPage(page);
     if (!searchQuery.trim()) {
       applyFilters(page);
@@ -93,9 +115,14 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
       MOVIES_PER_PAGE,
     );
     setTotalResults(total || 0);
-    announce(
-      `Found ${total || (results ? results.length : 0)} results for "${searchQuery}"`,
-    );
+    if (page === 1) {
+      setAllMovies(results || []);
+      announce(
+        `Found ${total || (results ? results.length : 0)} results for "${searchQuery}"`,
+      );
+    } else {
+      setAllMovies((prev) => [...prev, ...(results || [])]);
+    }
   };
 
   const handleRandomPick = async () => {
@@ -126,6 +153,52 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
   const handleRatingChange = (value) => {
     setFilters((prev) => ({ ...prev, minRating: value }));
   };
+
+  const getFilteredMovies = () => {
+    if (!allMovies || (watched.length === 0 && watchlist.length === 0)) {
+      return allMovies;
+    }
+
+    const watchedIds = new Set(watched.map((m) => `${m.movie_id}-${m.media_type || 'movie'}`));
+    const watchlistIds = new Set(watchlist.map((m) => `${m.movie_id}-${m.media_type || 'movie'}`));
+
+    return allMovies.filter((movie) => {
+      const id = `${movie.id}-${movie.media_type || 'movie'}`;
+      return !watchedIds.has(id) && !watchlistIds.has(id);
+    });
+  };
+
+  const loadMoreMovies = useCallback(async () => {
+    if (isLoadingMore || currentPage * MOVIES_PER_PAGE >= totalResults) return;
+    setIsLoadingMore(true);
+    const nextPage = currentPage + 1;
+
+    if (searchQuery.trim()) {
+      await handleSearch(nextPage);
+    } else {
+      await applyFilters(nextPage);
+    }
+
+    setIsLoadingMore(false);
+  }, [currentPage, isLoadingMore, searchQuery, filters, debouncedRating, totalResults]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loading && !isLoadingMore && allMovies.length > 0) {
+          loadMoreMovies();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => observer.disconnect();
+  }, [loadMoreMovies, loading, isLoadingMore, allMovies.length]);
 
   // Apply filters when they change (only if not searching, excluding minRating which is debounced separately)
   useEffect(() => {
@@ -297,50 +370,24 @@ export default function DiscoverTab({ announce, showMovieDetails }) {
         </div>
       </div>
 
-      {loading ? (
-        <LoadingSpinner message="Finding great content for you..." />
+      {allMovies.length === 0 && !loading ? (
+        <p className="text-center text-gray-400 py-12">
+          No results found. Try different filters!
+        </p>
       ) : (
         <>
-          <MovieGrid movies={movies} onMovieClick={showMovieDetails} />
-          {/* Pagination Controls */}
-          {totalResults > MOVIES_PER_PAGE && (
-            <div className="flex justify-center items-center gap-2 mt-8">
-              <button
-                onClick={() => {
-                  if (currentPage > 1) {
-                    searchQuery.trim()
-                      ? handleSearch(currentPage - 1)
-                      : applyFilters(currentPage - 1);
-                  }
-                }}
-                disabled={currentPage === 1}
-                className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === 1 ? "bg-slate-700 text-gray-400 cursor-not-allowed" : "bg-indigo-600 text-white hover:bg-indigo-700"}`}
-                aria-label="Previous page"
-              >
-                Previous
-              </button>
-              <span className="mx-2 text-gray-300">
-                Page {currentPage} of{" "}
-                {Math.ceil(totalResults / MOVIES_PER_PAGE)}
-              </span>
-              <button
-                onClick={() => {
-                  if (currentPage < Math.ceil(totalResults / MOVIES_PER_PAGE)) {
-                    searchQuery.trim()
-                      ? handleSearch(currentPage + 1)
-                      : applyFilters(currentPage + 1);
-                  }
-                }}
-                disabled={
-                  currentPage === Math.ceil(totalResults / MOVIES_PER_PAGE)
-                }
-                className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === Math.ceil(totalResults / MOVIES_PER_PAGE) ? "bg-slate-700 text-gray-400 cursor-not-allowed" : "bg-indigo-600 text-white hover:bg-indigo-700"}`}
-                aria-label="Next page"
-              >
-                Next
-              </button>
-            </div>
-          )}
+          <MovieGrid movies={getFilteredMovies()} onMovieClick={showMovieDetails} />
+          {/* Infinite scroll trigger */}
+          <div ref={observerTarget} className="py-8" aria-live="polite">
+            {isLoadingMore && (
+              <p className="text-center text-gray-400">Loading more content...</p>
+            )}
+            {!isLoadingMore && allMovies.length > 0 && currentPage * MOVIES_PER_PAGE >= totalResults && (
+              <p className="text-center text-gray-400 py-4">
+                No more results
+              </p>
+            )}
+          </div>
         </>
       )}
     </section>
