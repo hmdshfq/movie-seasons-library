@@ -1,1 +1,1 @@
-web: pnpm install && pnpm build && pnpm start
+web: pnpm install && pnpm migrate && pnpm build && pnpm start
