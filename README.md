@@ -19,6 +19,10 @@ movie-library/
 │   ├── client/                   # React frontend (Vite)
 │   │   ├── src/
 │   │   │   ├── components/       # React components
+│   │   │   │   ├── MovieGrid/    # Movie display grid component
+│   │   │   │   ├── MovieCarousel/# Scrollable carousel for recommendations
+│   │   │   │   ├── Tabs/         # Tab components (Discover, Library, Recommendations)
+│   │   │   │   └── ...
 │   │   │   ├── contexts/         # React contexts (Auth, Watchlist)
 │   │   │   ├── lib/              # Utility libraries (api client)
 │   │   │   ├── services/         # API service layer
@@ -140,6 +144,40 @@ pnpm dev
 - `DELETE /api/watchlist/:movieId` - Remove from watchlist
 - `GET /api/watchlist/:movieId/check` - Check if in watchlist
 
+### TMDB Integration
+- `GET /api/tmdb/movie/:id` - Get movie details
+- `GET /api/tmdb/search/movie` - Search movies
+- `GET /api/tmdb/discover/movie` - Discover movies with filters
+- `GET /api/tmdb/movie/:id/recommendations` - Get recommended movies
+- `GET /api/tmdb/movie/:id/similar` - Get similar movies
+- `GET /api/tmdb/trending/movie/:timeWindow` - Get trending movies (day/week)
+- `GET /api/tmdb/genre/movie/list` - Get movie genres
+
+## Recommendations System
+
+The app provides personalized movie recommendations based on user activity and preferences:
+
+### Algorithm Features
+- **Highly Rated Recommendations**: Uses movies rated 4-5 stars to find similar movies you might enjoy
+- **Recent Watches**: Suggests movies similar to your recent watch history
+- **Genre-Based Trending**: Shows trending movies in your favorite genres
+- **Top Rated by Genre**: Displays highly-rated movies in your preferred genres
+
+### Filtering Applied
+- Excludes already-watched movies
+- Excludes movies in your watchlist
+- Respects horror content preference (`hide_horror`)
+- Applies kids profile restrictions (`is_kids_profile`)
+
+### Components
+- **MovieCarousel** (`apps/client/src/components/MovieCarousel/`): Horizontal scrolling carousel for recommendation sections with smooth navigation and loading states
+- **RecommendationsTab** (`apps/client/src/components/Tabs/`): Main recommendations interface with multiple carousel sections
+
+### Backend Service Methods
+- `getSimilarMovies()` - Get movies similar to a specific movie
+- `getTrendingMovies()` - Fetch trending movies for a time window
+- `discoverByGenreAndRating()` - Find highly-rated movies in specific genres
+
 ## Authentication Flow
 
 1. User signs up/logs in via frontend
@@ -185,8 +223,9 @@ pnpm dev
 ### user_preferences
 - id (UUID, primary key)
 - profile_id (UUID, foreign key)
-- favorite_genres (TEXT[])
+- favorite_genres (INTEGER[]) - Array of genre IDs from TMDB
 - language (VARCHAR)
+- hide_horror (BOOLEAN) - Whether to hide horror content
 - updated_at (TIMESTAMP)
 
 ## Environment Variables

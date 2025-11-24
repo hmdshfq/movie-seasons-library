@@ -164,6 +164,66 @@ export const tmdbService = {
     return results.results;
   },
 
+  async getSimilarMovies(movieId, isKidsProfile = false, hideHorror = false) {
+    const results = await tmdb.getSimilarMovies(movieId);
+
+    let filtered = results.results;
+
+    if (isKidsProfile) {
+      filtered = filterKidsContent(filtered);
+    }
+
+    if (hideHorror) {
+      filtered = filtered.filter((movie) => movie.genre_ids && !movie.genre_ids.includes(parseInt(HORROR_GENRE_ID)));
+    }
+
+    return filtered;
+  },
+
+  async getTrendingMovies(timeWindow = 'week', isKidsProfile = false, hideHorror = false) {
+    const results = await tmdb.getTrendingMovies(timeWindow);
+
+    let filtered = results.results;
+
+    if (isKidsProfile) {
+      filtered = filterKidsContent(filtered);
+    }
+
+    if (hideHorror) {
+      filtered = filtered.filter((movie) => movie.genre_ids && !movie.genre_ids.includes(parseInt(HORROR_GENRE_ID)));
+    }
+
+    return filtered;
+  },
+
+  async discoverByGenreAndRating(genreIds, minRating = 7, isKidsProfile = false, hideHorror = false) {
+    const params = {
+      with_genres: genreIds.join(','),
+      sort_by: 'vote_average.desc',
+      'vote_average.gte': minRating,
+      'vote_count.gte': 50,
+    };
+
+    if (isKidsProfile) {
+      params.certification_country = "US";
+      params["certification.lte"] = "PG-13";
+    }
+
+    if (hideHorror) {
+      params.without_genres = HORROR_GENRE_ID;
+    }
+
+    const results = await tmdb.discoverMovies(params);
+
+    let filtered = results.results;
+
+    if (isKidsProfile) {
+      filtered = filterKidsContent(filtered);
+    }
+
+    return filtered;
+  },
+
   async getGenres(type = "movie") {
     return type === "movie" ? tmdb.getMovieGenres() : tmdb.getTVGenres();
   },

@@ -67,6 +67,25 @@ router.get('/movie/:id/recommendations', async (req, res, next) => {
   }
 });
 
+router.get('/movie/:id/similar', async (req, res, next) => {
+  try {
+    const data = await proxyTmdbRequest(`/movie/${req.params.id}/similar`);
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/trending/movie/:timeWindow', async (req, res, next) => {
+  try {
+    const { timeWindow } = req.params;
+    const data = await proxyTmdbRequest(`/trending/movie/${timeWindow}`);
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // TV endpoints
 router.get('/tv/:id', async (req, res, next) => {
   try {

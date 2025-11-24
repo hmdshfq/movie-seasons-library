@@ -2,15 +2,26 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { Sparkles, RefreshCw } from "lucide-react";
 import { movieService } from "../../services/movie.service";
+import { watchlistService } from "../../services/watchlist.service";
 import { tmdbService } from "../../services/tmdb.service";
-import MovieGrid from "../MovieGrid/MovieGrid";
+import MovieCarousel from "../MovieCarousel/MovieCarousel";
 import LoadingSpinner from "../UI/LoadingSpinner";
 import Button from "../UI/Button";
 
 export default function RecommendationsTab({ showMovieDetails, announce }) {
-  const { profile } = useAuth();
-  const [recommendations, setRecommendations] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const { profile, user } = useAuth();
+  const [carouselData, setCarouselData] = useState({
+    highlyRated: [],
+    recentWatches: [],
+    trendingGenres: [],
+    topRatedGenres: [],
+  });
+  const [loadingCarousels, setLoadingCarousels] = useState({
+    highlyRated: false,
+    recentWatches: false,
+    trendingGenres: false,
+    topRatedGenres: false,
+  });
   const [hasWatchedMovies, setHasWatchedMovies] = useState(false);
 
   useEffect(() => {
@@ -32,54 +43,173 @@ export default function RecommendationsTab({ showMovieDetails, announce }) {
     }
   };
 
+  const filterMovies = async (movies) => {
+    if (!movies || movies.length === 0) return [];
+
+    try {
+      // Get watched and watchlist movie IDs
+      const watched = await movieService.getWatchedMovies();
+      const watchlist = await watchlistService.getWatchlist();
+      const watchedIds = new Set(watched.map((m) => m.movie_id));
+      const watchlistIds = new Set(watchlist.map((m) => m.movie_id));
+
+      // Filter out watched and watchlist items
+      let filtered = movies.filter(
+        (movie) => !watchedIds.has(movie.id) && !watchlistIds.has(movie.id),
+      );
+
+      // Apply horror filter if enabled
+      if (profile?.hide_horror) {
+        filtered = filtered.filter(
+          (movie) => !movie.genre_ids || !movie.genre_ids.includes(27),
+        );
+      }
+
+      // Apply kids profile filter
+      if (profile?.is_kids_profile) {
+        filtered = filtered.filter((movie) => {
+          if (!movie.genre_ids) return true;
+          const kidsGenres = ["16", "10751", "12", "35"];
+          return movie.genre_ids.some((id) =>
+            kidsGenres.includes(id.toString()),
+          );
+        });
+      }
+
+      return filtered;
+    } catch (error) {
+      console.error("Error filtering movies:", error);
+      return movies;
+    }
+  };
+
   const getRecommendations = async () => {
     if (!profile) return;
 
-    setLoading(true);
     announce("Getting personalized recommendations...");
 
     try {
       const watched = await movieService.getWatchedMovies();
-      const watchedIds = new Set(watched.map((m) => m.movie_id));
-      const recommendationSet = new Set();
-      const targetCount = 6;
 
-      // Use the entire watched history for recommendations
-      const recsPerMovie = 6;
-      for (const movie of watched) {
-        if (recommendationSet.size >= targetCount) break;
+      // Carousel 1: Based on Highly Rated (4-5 stars)
+      const highlyRatedWatched = watched.filter((m) => m.rating >= 4);
+      await buildHighlyRatedCarousel(highlyRatedWatched);
 
-        const recs = await tmdbService.getRecommendations(movie.movie_id);
-        recs
-          .filter((rec) => !watchedIds.has(rec.id))
-          .slice(0, recsPerMovie)
-          .forEach((rec) => {
-            recommendationSet.add(JSON.stringify(rec));
-          });
-      }
+      // Carousel 2: More Like Recent Watches
+      const recentWatched = watched.slice(-10);
+      await buildRecentWatchesCarousel(recentWatched);
 
-      // Shuffle recommendations before picking 6
-      const shuffle = (arr) => {
-        for (let i = arr.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [arr[i], arr[j]] = [arr[j], arr[i]];
-        }
-        return arr;
-      };
+      // Carousel 3 & 4: Genre-based (requires preferences)
+      await buildGenreBasedCarousels();
 
-      const allRecommendations = Array.from(recommendationSet).map((r) => JSON.parse(r));
-      const shuffled = shuffle(allRecommendations);
-      const uniqueRecommendations = shuffled.slice(0, targetCount); // Random 6
-
-      setRecommendations(uniqueRecommendations);
-      announce(
-        `Found ${uniqueRecommendations.length} recommendations based on your library`,
-      );
+      announce("Personalized recommendations loaded");
     } catch (error) {
       console.error("Error getting recommendations:", error);
       announce("Error getting recommendations. Please try again.");
+    }
+  };
+
+  const buildHighlyRatedCarousel = async (highlyRatedMovies) => {
+    setLoadingCarousels((prev) => ({ ...prev, highlyRated: true }));
+    try {
+      const movies = new Set();
+
+      for (const watched of highlyRatedMovies.slice(0, 5)) {
+        const similar = await tmdbService.getSimilarMovies(
+          watched.movie_id,
+          profile?.is_kids_profile,
+          profile?.hide_horror,
+        );
+        similar.slice(0, 10).forEach((m) => movies.add(JSON.stringify(m)));
+      }
+
+      const filtered = await filterMovies(
+        Array.from(movies)
+          .map((m) => JSON.parse(m))
+          .slice(0, 20),
+      );
+
+      setCarouselData((prev) => ({ ...prev, highlyRated: filtered }));
+    } catch (error) {
+      console.error("Error building highly rated carousel:", error);
     } finally {
-      setLoading(false);
+      setLoadingCarousels((prev) => ({ ...prev, highlyRated: false }));
+    }
+  };
+
+  const buildRecentWatchesCarousel = async (recentMovies) => {
+    setLoadingCarousels((prev) => ({ ...prev, recentWatches: true }));
+    try {
+      const movies = new Set();
+
+      for (const watched of recentMovies) {
+        const recs = await tmdbService.getRecommendations(
+          watched.movie_id,
+          profile?.is_kids_profile,
+        );
+        recs.slice(0, 10).forEach((m) => movies.add(JSON.stringify(m)));
+      }
+
+      const filtered = await filterMovies(
+        Array.from(movies)
+          .map((m) => JSON.parse(m))
+          .slice(0, 20),
+      );
+
+      setCarouselData((prev) => ({ ...prev, recentWatches: filtered }));
+    } catch (error) {
+      console.error("Error building recent watches carousel:", error);
+    } finally {
+      setLoadingCarousels((prev) => ({ ...prev, recentWatches: false }));
+    }
+  };
+
+  const buildGenreBasedCarousels = async () => {
+    setLoadingCarousels((prev) => ({
+      ...prev,
+      trendingGenres: true,
+      topRatedGenres: true,
+    }));
+    try {
+      const favoriteGenres = profile?.favorite_genres || [];
+
+      if (favoriteGenres.length > 0) {
+        // Get trending in favorite genres
+        const trending = await tmdbService.getTrendingMovies(
+          "week",
+          profile?.is_kids_profile,
+          profile?.hide_horror,
+        );
+        const trendingFiltered = trending
+          .filter((m) => {
+            if (!m.genre_ids) return false;
+            return m.genre_ids.some((id) => favoriteGenres.includes(id));
+          })
+          .slice(0, 20);
+        const trendingFinal = await filterMovies(trendingFiltered);
+        setCarouselData((prev) => ({ ...prev, trendingGenres: trendingFinal }));
+
+        // Get top rated in favorite genres
+        const topRated = await tmdbService.discoverByGenreAndRating(
+          favoriteGenres,
+          7.5,
+          profile?.is_kids_profile,
+          profile?.hide_horror,
+        );
+        const topRatedFinal = await filterMovies(topRated.slice(0, 20));
+        setCarouselData((prev) => ({
+          ...prev,
+          topRatedGenres: topRatedFinal,
+        }));
+      }
+    } catch (error) {
+      console.error("Error building genre-based carousels:", error);
+    } finally {
+      setLoadingCarousels((prev) => ({
+        ...prev,
+        trendingGenres: false,
+        topRatedGenres: false,
+      }));
     }
   };
 
@@ -103,6 +233,8 @@ export default function RecommendationsTab({ showMovieDetails, announce }) {
     );
   }
 
+  const isAnyLoading = Object.values(loadingCarousels).some((l) => l);
+
   return (
     <section
       className="animate-fadeIn"
@@ -115,21 +247,54 @@ export default function RecommendationsTab({ showMovieDetails, announce }) {
             onClick={getRecommendations}
             variant="secondary"
             icon={RefreshCw}
-            disabled={loading}
+            disabled={isAnyLoading}
             aria-label="Refresh recommendations"
           >
             Refresh
           </Button>
         </div>
         <p className="text-gray-400">
-          Based on your watched history, we think you'll love these:
+          Personalized recommendations based on your watched history and
+          preferences
         </p>
       </div>
 
-      {loading ? (
+      {isAnyLoading && Object.values(carouselData).every((c) => c.length === 0) ? (
         <LoadingSpinner message="Analyzing your preferences..." />
       ) : (
-        <MovieGrid movies={recommendations} onMovieClick={showMovieDetails} />
+        <div className="space-y-8">
+          <MovieCarousel
+            title="Based on Your Highly Rated"
+            movies={carouselData.highlyRated}
+            onMovieClick={showMovieDetails}
+            isLoading={loadingCarousels.highlyRated}
+          />
+
+          <MovieCarousel
+            title="More Like Your Recent Watches"
+            movies={carouselData.recentWatches}
+            onMovieClick={showMovieDetails}
+            isLoading={loadingCarousels.recentWatches}
+          />
+
+          {profile?.favorite_genres && profile.favorite_genres.length > 0 && (
+            <>
+              <MovieCarousel
+                title="Trending in Your Favorite Genres"
+                movies={carouselData.trendingGenres}
+                onMovieClick={showMovieDetails}
+                isLoading={loadingCarousels.trendingGenres}
+              />
+
+              <MovieCarousel
+                title="Top Rated in Your Favorite Genres"
+                movies={carouselData.topRatedGenres}
+                onMovieClick={showMovieDetails}
+                isLoading={loadingCarousels.topRatedGenres}
+              />
+            </>
+          )}
+        </div>
       )}
     </section>
   );

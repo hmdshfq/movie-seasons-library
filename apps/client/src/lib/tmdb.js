@@ -40,6 +40,14 @@ class TMDBClient {
     return this.request(`/movie/${movieId}/recommendations`);
   }
 
+  async getSimilarMovies(movieId) {
+    return this.request(`/movie/${movieId}/similar`);
+  }
+
+  async getTrendingMovies(timeWindow = 'week') {
+    return this.request(`/trending/movie/${timeWindow}`);
+  }
+
   // TV methods
   async getTVShow(tvId) {
     return this.request(`/tv/${tvId}`);
