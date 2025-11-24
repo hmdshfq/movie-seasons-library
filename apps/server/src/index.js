@@ -19,8 +19,11 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5001',
   'http://localhost:3000',
+  'https://mose.up.railway.app',
   process.env.CLIENT_URL
 ].filter(Boolean);
+
+console.log(`The client URL is ${process.env.CLIENT_URL} and port is ${PORT}`);
 
 app.use(cors({
   origin: (origin, callback) => {
