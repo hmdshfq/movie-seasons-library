@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import authRoutes from './routes/auth.js';
 import profileRoutes from './routes/profile.js';
 import watchlistRoutes from './routes/watchlist.js';
+import tmdbRoutes from './routes/tmdb.js';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/watchlist', watchlistRoutes);
+app.use('/api/tmdb', tmdbRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

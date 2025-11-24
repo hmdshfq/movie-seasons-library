@@ -1,14 +1,12 @@
-import { API_KEY, BASE_URL } from '../utils/constants';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 class TMDBClient {
   constructor() {
-    this.apiKey = API_KEY;
-    this.baseUrl = BASE_URL;
+    this.baseUrl = `${API_BASE_URL}/api/tmdb`;
   }
 
   async request(endpoint, params = {}) {
     const url = new URL(`${this.baseUrl}${endpoint}`);
-    url.searchParams.append('api_key', this.apiKey);
 
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== '') {

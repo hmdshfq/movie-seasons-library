@@ -96,7 +96,7 @@ pnpm migrate
 cp .env.example apps/client/.env
 
 # .env should contain:
-# VITE_API_URL=http://localhost:5001
+# VITE_API_URL=http://localhost:5000
 # VITE_TMDB_API_KEY=your_api_key
 ```
 
@@ -109,7 +109,7 @@ Start both frontend and backend with auto-reload:
 pnpm dev
 ```
 
-- Backend: `http://localhost:5001`
+- Backend: `http://localhost:5000`
 - Frontend: `http://localhost:5173`
 
 ## API Endpoints
