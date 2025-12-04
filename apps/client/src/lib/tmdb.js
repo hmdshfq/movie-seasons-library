@@ -44,6 +44,10 @@ class TMDBClient {
     return this.request(`/movie/${movieId}/similar`);
   }
 
+  async getMovieVideos(movieId) {
+    return this.request(`/movie/${movieId}/videos`);
+  }
+
   async getTrendingMovies(timeWindow = 'week') {
     return this.request(`/trending/movie/${timeWindow}`);
   }
@@ -51,6 +55,10 @@ class TMDBClient {
   // TV methods
   async getTVShow(tvId) {
     return this.request(`/tv/${tvId}`);
+  }
+
+  async getTVVideos(tvId) {
+    return this.request(`/tv/${tvId}/videos`);
   }
 
   async searchTVShows(query, page = 1) {

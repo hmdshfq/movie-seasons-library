@@ -76,6 +76,15 @@ router.get('/movie/:id/similar', async (req, res, next) => {
   }
 });
 
+router.get('/movie/:id/videos', async (req, res, next) => {
+  try {
+    const data = await proxyTmdbRequest(`/movie/${req.params.id}/videos`);
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get('/trending/movie/:timeWindow', async (req, res, next) => {
   try {
     const { timeWindow } = req.params;
@@ -90,6 +99,15 @@ router.get('/trending/movie/:timeWindow', async (req, res, next) => {
 router.get('/tv/:id', async (req, res, next) => {
   try {
     const data = await proxyTmdbRequest(`/tv/${req.params.id}`);
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/tv/:id/videos', async (req, res, next) => {
+  try {
+    const data = await proxyTmdbRequest(`/tv/${req.params.id}/videos`);
     res.json(data);
   } catch (error) {
     next(error);
