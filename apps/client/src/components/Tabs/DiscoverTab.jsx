@@ -160,6 +160,9 @@ export default function DiscoverTab({ announce, showMovieDetails, movieToRemove,
       });
     }
     if (movies && movies.length > 0) {
+      setAllMovies(movies);
+      setCurrentPage(1);
+      setTotalResults(movies.length);
       announce(
         `Found ${movies.length} random ${filters.mediaType === "tv" ? "TV shows" : "movies"}`,
       );
