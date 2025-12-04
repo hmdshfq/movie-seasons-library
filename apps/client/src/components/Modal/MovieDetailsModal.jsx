@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useWatchlist } from "../../contexts/WatchlistContext";
-import { X, Star, Plus, Check, Calendar, Clock, Play } from "lucide-react";
+import { X, Star, Plus, Check, Calendar, Clock, Play, Bookmark, Eye } from "lucide-react";
 import Button from "../UI/Button";
 import { IMG_BASE_URL } from "../../utils/constants";
 import tmdbClient from "../../lib/tmdb";
@@ -132,8 +132,8 @@ export default function MovieDetailsModal({
             aria-label="Close movie details">
             <X size={24} />
           </button>
-          <div className="flex flex-col gap-6">
-            {/* Poster Card on Left */}
+          <div className="flex flex-col gap-6 relative">
+            {/* Poster Card on Left with Action Buttons */}
             <div className="flex gap-6">
               <div className="flex-shrink-0">
                 <img
@@ -145,6 +145,46 @@ export default function MovieDetailsModal({
                   alt={`${movie.title || movie.name} poster`}
                   className="w-32 h-48 md:w-40 md:h-56 object-cover rounded-lg shadow-2xl"
                 />
+                {/* Action Buttons - Positioned on large screens */}
+                <div className="hidden lg:flex flex-col gap-3 absolute top-28 right-0">
+                  <Button
+                    onClick={async () => {
+                      await onToggleWatched(movie);
+                      // Delay modal close to allow animation to play
+                      setTimeout(onClose, 300);
+                    }}
+                    variant={isWatched(movie.id) ? "secondary" : "primary"}
+                    icon={isWatched(movie.id) ? Check : Eye}
+                    fullWidth>
+                    {isWatched(movie.id) ? "Watched" : "Watched"}
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      if (isInWatchlist(movie.id)) {
+                        await removeFromWatchlist(
+                          movie.id,
+                          movie.media_type ||
+                            (movie.first_air_date ? "tv" : "movie")
+                        );
+                        onClose();
+                      } else {
+                        onRemoveMovie?.(movie.id);
+                        await addToWatchlist({
+                          ...movie,
+                          media_type:
+                            movie.media_type ||
+                            (movie.first_air_date ? "tv" : "movie"),
+                        });
+                        // Delay modal close to allow animation to play
+                        setTimeout(onClose, 300);
+                      }
+                    }}
+                    variant={isInWatchlist(movie.id) ? "secondary" : "primary"}
+                    icon={isInWatchlist(movie.id) ? Check : Bookmark}
+                    fullWidth>
+                    {isInWatchlist(movie.id) ? "Watchlist" : "Watchlist"}
+                  </Button>
+                </div>
               </div>
 
               {/* Details */}
@@ -228,8 +268,8 @@ export default function MovieDetailsModal({
               </p>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-4">
+            {/* Action Buttons - Only show on small/medium screens */}
+            <div className="lg:hidden flex gap-4">
               <Button
                 onClick={async () => {
                   await onToggleWatched(movie);
@@ -237,8 +277,8 @@ export default function MovieDetailsModal({
                   setTimeout(onClose, 300);
                 }}
                 variant={isWatched(movie.id) ? "secondary" : "primary"}
-                icon={isWatched(movie.id) ? Check : Plus}>
-                {isWatched(movie.id) ? "Watched" : "Add to Watched"}
+                icon={isWatched(movie.id) ? Check : Eye}>
+                {isWatched(movie.id) ? "Watched" : "Watched"}
               </Button>
               <Button
                 onClick={async () => {
@@ -262,8 +302,8 @@ export default function MovieDetailsModal({
                   }
                 }}
                 variant={isInWatchlist(movie.id) ? "secondary" : "primary"}
-                icon={isInWatchlist(movie.id) ? Check : Plus}>
-                {isInWatchlist(movie.id) ? "In Watchlist" : "Add to Watchlist"}
+                icon={isInWatchlist(movie.id) ? Check : Bookmark}>
+                {isInWatchlist(movie.id) ? "Watchlist" : "Watchlist"}
               </Button>
             </div>
 
