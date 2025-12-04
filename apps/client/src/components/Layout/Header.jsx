@@ -9,13 +9,13 @@ export default function Header({ activeTab, setActiveTab, announce }) {
   const navigate = useNavigate();
   const tabs = [
     { id: "discover", label: "Discover", route: "/" },
-    { id: "watchlist", label: "Watchlist", route: "/watchlist" },
     {
       id: "recommendations",
       label: "Recommendations",
       route: "/recommendations",
     },
     { id: "library", label: "Watched", route: "/library" },
+    { id: "watchlist", label: "Watchlist", route: "/watchlist" },
   ];
 
   const handleTabClick = (tab) => {
