@@ -4,10 +4,11 @@ import { useWatchlist } from "../../contexts/WatchlistContext";
 import { tmdbService } from "../../services/tmdb.service";
 import MovieGrid from "../MovieGrid/MovieGrid";
 
-export default function WatchlistTab() {
+export default function WatchlistTab({ showMovieDetails }) {
   const { watchlist, removeFromWatchlist } = useWatchlist();
   const [detailedItems, setDetailedItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [removedMovies, setRemovedMovies] = useState(new Set());
 
   useEffect(() => {
     let cancelled = false;
@@ -42,6 +43,21 @@ export default function WatchlistTab() {
     };
   }, [watchlist]);
 
+  const handleRemoveMovie = (movieId) => {
+    setRemovedMovies((prev) => new Set([...prev, movieId]));
+    // Remove from watchlist after animation completes
+    setTimeout(() => {
+      const item = watchlist.find((w) => w.movie_id === movieId);
+      if (item) removeFromWatchlist(movieId, item.media_type);
+      setDetailedItems((prev) => prev.filter((movie) => movie.id !== movieId));
+      setRemovedMovies((prev) => {
+        const updated = new Set(prev);
+        updated.delete(movieId);
+        return updated;
+      });
+    }, 350);
+  };
+
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">My Watchlist</h2>
@@ -52,11 +68,9 @@ export default function WatchlistTab() {
       ) : (
         <MovieGrid
           movies={detailedItems}
-          onRemove={(id) => {
-            const item = watchlist.find((w) => w.movie_id === id);
-            if (item) removeFromWatchlist(id, item.media_type);
-          }}
-          showRemoveButton
+          onMovieClick={showMovieDetails}
+          onRemoveMovie={handleRemoveMovie}
+          removedMovieIds={removedMovies}
         />
       )}
     </div>
