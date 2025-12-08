@@ -4,7 +4,6 @@ import Header from "../components/Layout/Header";
 import ApiNotice from "../components/UI/ApiNotice";
 import DiscoverTab from "../components/Tabs/DiscoverTab";
 import LibraryTab from "../components/Tabs/LibraryTab";
-import RecommendationsTab from "../components/Tabs/RecommendationsTab";
 import MovieDetailsModal from "../components/Modal/MovieDetailsModal";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useAnnouncements } from "../hooks/useAnnouncements";
@@ -92,14 +91,6 @@ export default function MovieLibrary() {
             watchedMovies={watchedMovies}
             showMovieDetails={showMovieDetails}
             toggleWatched={toggleWatched}
-          />
-        )}
-
-        {activeTab === "recommendations" && (
-          <RecommendationsTab
-            watchedMovies={watchedMovies}
-            showMovieDetails={showMovieDetails}
-            announce={announce}
           />
         )}
       </main>

@@ -9,11 +9,6 @@ export default function Header({ activeTab, setActiveTab, announce }) {
   const navigate = useNavigate();
   const tabs = [
     { id: "discover", label: "Discover", route: "/" },
-    {
-      id: "recommendations",
-      label: "Recommendations",
-      route: "/recommendations",
-    },
     { id: "library", label: "Watched", route: "/library" },
     { id: "watchlist", label: "Watchlist", route: "/watchlist" },
   ];
@@ -25,11 +20,11 @@ export default function Header({ activeTab, setActiveTab, announce }) {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-gradient-to-b from-slate-800 to-slate-900 backdrop-blur-lg animate-slideIn">
+    <header className="sticky top-0 z-50 bg-linear-to-b from-slate-800 to-slate-900 backdrop-blur-lg animate-slideIn">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         <div className="flex items-center justify-between gap-4">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black bg-gradient-to-r from-indigo-500 to-pink-500 bg-clip-text text-transparent">
-            Movie Library
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black bg-linear-to-r from-indigo-500 to-pink-500 bg-clip-text text-transparent">
+            MOSE
           </h1>
 
           <div className="flex items-center gap-2 sm:gap-4">

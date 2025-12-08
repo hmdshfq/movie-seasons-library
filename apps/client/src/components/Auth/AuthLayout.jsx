@@ -4,7 +4,7 @@ export default function AuthLayout({ children, title, subtitle }) {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-black bg-gradient-to-r from-indigo-500 to-pink-500 bg-clip-text text-transparent mb-2">
-            Movie Library
+            MOSE
           </h1>
           {title && (
             <h2 className="text-2xl font-bold text-white mb-2">{title}</h2>

@@ -17,7 +17,7 @@ export default function Signup() {
   return (
     <AuthLayout
       title="Create Account"
-      subtitle="Join Movie Library to get personalized recommendations">
+      subtitle="Join MOSE to track your movies and shows">
       <SignupForm />
     </AuthLayout>
   );

@@ -42,7 +42,6 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/library" element={<Home />} />
                 <Route path="/watchlist" element={<Watchlist />} />
-                <Route path="/recommendations" element={<Home />} />
               </Route>
             </Route>
 

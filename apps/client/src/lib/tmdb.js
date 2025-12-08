@@ -36,9 +36,6 @@ class TMDBClient {
     return this.request('/discover/movie', params);
   }
 
-  async getMovieRecommendations(movieId) {
-    return this.request(`/movie/${movieId}/recommendations`);
-  }
 
   async getSimilarMovies(movieId) {
     return this.request(`/movie/${movieId}/similar`);

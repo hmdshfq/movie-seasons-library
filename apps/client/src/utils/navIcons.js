@@ -4,7 +4,6 @@ export const getTabIcon = (tabId) => {
   const iconMap = {
     discover: Compass,
     watchlist: Bookmark,
-    recommendations: Sparkles,
     library: Library,
   };
   return iconMap[tabId];

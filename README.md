@@ -1,4 +1,4 @@
-# Movie Library App
+# MOSE — Movies and Shows Explorer
 
 A React + Vite application for tracking and managing movies with a custom Express API backend and PostgreSQL database.
 

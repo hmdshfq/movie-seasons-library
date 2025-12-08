@@ -154,15 +154,6 @@ export const tmdbService = {
     return { results: results.results, total: results.total_results };
   },
 
-  async getRecommendations(movieId, isKidsProfile = false) {
-    const results = await tmdb.getMovieRecommendations(movieId);
-
-    if (isKidsProfile) {
-      return filterKidsContent(results.results);
-    }
-
-    return results.results;
-  },
 
   async getSimilarMovies(movieId, isKidsProfile = false, hideHorror = false) {
     const results = await tmdb.getSimilarMovies(movieId);

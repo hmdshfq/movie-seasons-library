@@ -1,6 +1,5 @@
 import DiscoverTab from "../components/Tabs/DiscoverTab";
 import LibraryTab from "../components/Tabs/LibraryTab";
-import RecommendationsTab from "../components/Tabs/RecommendationsTab";
 import MovieDetailsModal from "../components/Modal/MovieDetailsModal";
 import { useState, useEffect } from "react";
 import { useOutletContext, useLocation, useNavigate } from "react-router-dom";
@@ -14,7 +13,6 @@ export default function Home() {
   const navigate = useNavigate();
   const tabFromPath = () => {
     if (location.pathname === "/library") return "library";
-    if (location.pathname === "/recommendations") return "recommendations";
     return "discover";
   };
   const [tab, setTab] = useState(tabFromPath());
@@ -90,18 +88,12 @@ export default function Home() {
 
   return (
     <>
+
       {tab === "discover" && (
         <DiscoverTab announce={announce} showMovieDetails={showMovieDetails} movieToRemove={movieToRemove} onMovieRemoveHandled={() => setMovieToRemove(null)} />
       )}
 
       {tab === "library" && <LibraryTab showMovieDetails={showMovieDetails} />}
-
-      {tab === "recommendations" && (
-        <RecommendationsTab
-          showMovieDetails={showMovieDetails}
-          announce={announce}
-        />
-      )}
 
       <MovieDetailsModal
         isOpen={modalOpen}
