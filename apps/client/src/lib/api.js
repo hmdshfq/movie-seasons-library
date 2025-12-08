@@ -14,6 +14,8 @@ export const api = {
   async request(endpoint, options = {}) {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
+      // Include credentials to send/receive HttpOnly cookies
+      credentials: 'include',
       headers: {
         ...getHeaders(),
         ...options.headers
