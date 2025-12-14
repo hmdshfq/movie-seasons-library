@@ -3,6 +3,7 @@ import { useState } from "react";
 import Header from "./Header";
 import SkipToMain from "./SkipToMain";
 import { useAnnouncements } from "../../hooks/useAnnouncements";
+import GoToTop from "../UI/GoToTop";
 
 export default function Layout() {
   const [activeTab, setActiveTab] = useState("discover");
@@ -32,6 +33,7 @@ export default function Layout() {
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Outlet context={{ activeTab, announce }} />
       </main>
+      <GoToTop />
     </div>
   );
 }

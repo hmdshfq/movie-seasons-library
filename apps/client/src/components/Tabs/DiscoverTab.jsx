@@ -27,10 +27,8 @@ export default function DiscoverTab({ announce, showMovieDetails, movieToRemove,
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     mediaType: "movie",
-    genre: "",
-    year: "",
-    sortBy: "popularity.desc",
-    minRating: 0,
+    year: "2025",
+    sortBy: "popularity.desc"
   });
 
   const handleRemoveMovie = (movieId) => {

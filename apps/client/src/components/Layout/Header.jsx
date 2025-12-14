@@ -1,7 +1,7 @@
 import { useAuth } from "../../contexts/AuthContext";
 import UserMenu from "./UserMenu";
 import MobileNav from "./MobileNav";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { getTabIcon } from "../../utils/navIcons";
 
 export default function Header({ activeTab, setActiveTab, announce }) {
@@ -24,7 +24,9 @@ export default function Header({ activeTab, setActiveTab, announce }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black bg-linear-to-r from-indigo-500 to-pink-500 bg-clip-text text-transparent">
-            MOSE
+            <Link to="/" aria-label="Go to Home" className="focus:outline-none focus:ring-2 focus:ring-indigo-400 rounded-sm">
+              MOSE
+            </Link>
           </h1>
 
           <div className="flex items-center gap-2 sm:gap-4">

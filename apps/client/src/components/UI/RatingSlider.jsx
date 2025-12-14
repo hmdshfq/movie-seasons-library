@@ -3,7 +3,7 @@ import { Star } from "lucide-react";
 import { useDebounce } from "../../hooks/useDebounce";
 import "./RatingSlider.css";
 
-export default function RatingSlider({ value, onChange, className = "" }) {
+export default function RatingSlider({ value = 5, onChange, className = "" }) {
   const [localValue, setLocalValue] = useState(value);
   const debouncedValue = useDebounce(localValue, 300);
 
@@ -63,8 +63,8 @@ export default function RatingSlider({ value, onChange, className = "" }) {
               />
             ))}
           </div>
-          <span className="text-sm font-semibold text-white min-w-[3rem]">
-            {localValue === 0 ? "Any" : `${localValue}/10`}
+          <span className="text-sm font-semibold text-white min-w-12">
+            {localValue === 0 ? 5 : `${localValue}/10`}
           </span>
         </div>
       </div>
