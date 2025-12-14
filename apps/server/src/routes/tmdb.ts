@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 
 const router = express.Router();
 
@@ -10,13 +10,13 @@ if (!TMDB_API_KEY) {
 }
 
 // Generic TMDB proxy handler
-async function proxyTmdbRequest(endpoint, params = {}) {
+async function proxyTmdbRequest(endpoint: string, params: Record<string, string | number> = {}): Promise<unknown> {
   const url = new URL(`${TMDB_BASE_URL}${endpoint}`);
-  url.searchParams.append('api_key', TMDB_API_KEY);
+  url.searchParams.append('api_key', TMDB_API_KEY || '');
 
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== '') {
-      url.searchParams.append(key, value);
+      url.searchParams.append(key, String(value));
     }
   });
 
@@ -30,7 +30,7 @@ async function proxyTmdbRequest(endpoint, params = {}) {
 }
 
 // Movie endpoints
-router.get('/movie/:id', async (req, res, next) => {
+router.get('/movie/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = await proxyTmdbRequest(`/movie/${req.params.id}`);
     res.json(data);
@@ -39,26 +39,35 @@ router.get('/movie/:id', async (req, res, next) => {
   }
 });
 
-router.get('/search/movie', async (req, res, next) => {
+router.get('/search/movie', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { query, page } = req.query;
-    const data = await proxyTmdbRequest('/search/movie', { query, page: page || 1 });
+    const data = await proxyTmdbRequest('/search/movie', { 
+      query: query as string, 
+      page: page ? Number(page) : 1 
+    });
     res.json(data);
   } catch (error) {
     next(error);
   }
 });
 
-router.get('/discover/movie', async (req, res, next) => {
+router.get('/discover/movie', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await proxyTmdbRequest('/discover/movie', req.query);
+    const params: Record<string, string | number> = {};
+    Object.entries(req.query).forEach(([key, value]) => {
+      if (value) {
+        params[key] = typeof value === 'string' ? value : Number(value);
+      }
+    });
+    const data = await proxyTmdbRequest('/discover/movie', params);
     res.json(data);
   } catch (error) {
     next(error);
   }
 });
 
-router.get('/movie/:id/recommendations', async (req, res, next) => {
+router.get('/movie/:id/recommendations', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = await proxyTmdbRequest(`/movie/${req.params.id}/recommendations`);
     res.json(data);
@@ -67,7 +76,7 @@ router.get('/movie/:id/recommendations', async (req, res, next) => {
   }
 });
 
-router.get('/movie/:id/similar', async (req, res, next) => {
+router.get('/movie/:id/similar', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = await proxyTmdbRequest(`/movie/${req.params.id}/similar`);
     res.json(data);
@@ -76,7 +85,7 @@ router.get('/movie/:id/similar', async (req, res, next) => {
   }
 });
 
-router.get('/movie/:id/videos', async (req, res, next) => {
+router.get('/movie/:id/videos', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = await proxyTmdbRequest(`/movie/${req.params.id}/videos`);
     res.json(data);
@@ -85,7 +94,7 @@ router.get('/movie/:id/videos', async (req, res, next) => {
   }
 });
 
-router.get('/trending/movie/:timeWindow', async (req, res, next) => {
+router.get('/trending/movie/:timeWindow', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { timeWindow } = req.params;
     const data = await proxyTmdbRequest(`/trending/movie/${timeWindow}`);
@@ -96,7 +105,7 @@ router.get('/trending/movie/:timeWindow', async (req, res, next) => {
 });
 
 // TV endpoints
-router.get('/tv/:id', async (req, res, next) => {
+router.get('/tv/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = await proxyTmdbRequest(`/tv/${req.params.id}`);
     res.json(data);
@@ -105,7 +114,7 @@ router.get('/tv/:id', async (req, res, next) => {
   }
 });
 
-router.get('/tv/:id/videos', async (req, res, next) => {
+router.get('/tv/:id/videos', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = await proxyTmdbRequest(`/tv/${req.params.id}/videos`);
     res.json(data);
@@ -114,19 +123,28 @@ router.get('/tv/:id/videos', async (req, res, next) => {
   }
 });
 
-router.get('/search/tv', async (req, res, next) => {
+router.get('/search/tv', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { query, page } = req.query;
-    const data = await proxyTmdbRequest('/search/tv', { query, page: page || 1 });
+    const data = await proxyTmdbRequest('/search/tv', { 
+      query: query as string, 
+      page: page ? Number(page) : 1 
+    });
     res.json(data);
   } catch (error) {
     next(error);
   }
 });
 
-router.get('/discover/tv', async (req, res, next) => {
+router.get('/discover/tv', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await proxyTmdbRequest('/discover/tv', req.query);
+    const params: Record<string, string | number> = {};
+    Object.entries(req.query).forEach(([key, value]) => {
+      if (value) {
+        params[key] = typeof value === 'string' ? value : Number(value);
+      }
+    });
+    const data = await proxyTmdbRequest('/discover/tv', params);
     res.json(data);
   } catch (error) {
     next(error);
@@ -134,10 +152,10 @@ router.get('/discover/tv', async (req, res, next) => {
 });
 
 // Multi-search
-router.get('/search/multi', async (req, res, next) => {
+router.get('/search/multi', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { query } = req.query;
-    const data = await proxyTmdbRequest('/search/multi', { query });
+    const data = await proxyTmdbRequest('/search/multi', { query: query as string });
     res.json(data);
   } catch (error) {
     next(error);
@@ -145,7 +163,7 @@ router.get('/search/multi', async (req, res, next) => {
 });
 
 // Genres
-router.get('/genre/movie/list', async (req, res, next) => {
+router.get('/genre/movie/list', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = await proxyTmdbRequest('/genre/movie/list');
     res.json(data);
@@ -154,7 +172,7 @@ router.get('/genre/movie/list', async (req, res, next) => {
   }
 });
 
-router.get('/genre/tv/list', async (req, res, next) => {
+router.get('/genre/tv/list', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = await proxyTmdbRequest('/genre/tv/list');
     res.json(data);
@@ -164,3 +182,4 @@ router.get('/genre/tv/list', async (req, res, next) => {
 });
 
 export default router;
+

@@ -2,13 +2,13 @@
  * Token blacklist for handling logout and token invalidation
  * In production, use Redis for distributed systems
  */
-const tokenBlacklist = new Set();
+const tokenBlacklist = new Set<string>();
 
-export const addTokenToBlacklist = (token) => {
+export const addTokenToBlacklist = (token: string): void => {
   tokenBlacklist.add(token);
 };
 
-export const isTokenBlacklisted = (token) => {
+export const isTokenBlacklisted = (token: string): boolean => {
   return tokenBlacklist.has(token);
 };
 
@@ -23,3 +23,4 @@ setInterval(() => {
 }, 60 * 60 * 1000);
 
 export { tokenBlacklist };
+

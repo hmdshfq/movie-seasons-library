@@ -1,9 +1,9 @@
 import { useState } from 'react';
 
 export function useAnnouncements() {
-  const [announcement, setAnnouncement] = useState('');
+  const [announcement, setAnnouncement] = useState<string>('');
 
-  const announce = (message) => {
+  const announce = (message: string): void => {
     setAnnouncement(message);
     setTimeout(() => setAnnouncement(''), 100);
   };

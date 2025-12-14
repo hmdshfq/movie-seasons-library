@@ -1,14 +1,29 @@
 import { useState } from "react";
 import { tmdbService } from "../services/tmdb.service";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "./useAuth";
+
+interface Movie {
+  id: number;
+  [key: string]: unknown;
+}
+
+interface DiscoverFilters {
+  mediaType?: string;
+  genre?: string;
+  year?: string;
+  sortBy?: string;
+  minRating?: number;
+  page?: number;
+  [key: string]: unknown;
+}
 
 export function useMovies() {
   const { profile, preferences } = useAuth();
-  const [movies, setMovies] = useState([]);
+  const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
 
   const MOVIES_PER_PAGE = 18;
-  const discoverMovies = async (filters, page = 1) => {
+  const discoverMovies = async (filters: DiscoverFilters, page = 1): Promise<{ results: Movie[]; total: number }> => {
     setLoading(true);
     try {
       const isKidsProfile = profile?.is_kids || false;
@@ -29,7 +44,7 @@ export function useMovies() {
     }
   };
 
-  const searchMovies = async (query, mediaType, page = 1) => {
+  const searchMovies = async (query: string, mediaType?: string, page = 1): Promise<{ results: Movie[]; total: number }> => {
     if (!query.trim()) return { results: [], total: 0 };
 
     setLoading(true);
@@ -39,8 +54,8 @@ export function useMovies() {
         { query, mediaType, page },
         isKidsProfile,
       );
-      setMovies(results.results || results);
-      return results.total ? results : { results, total: 0 };
+      setMovies(results.results || (results as Movie[]));
+      return results.total ? results : { results: results.results || (results as Movie[]), total: 0 };
     } catch (error) {
       console.error("Error searching movies:", error);
       setMovies([]);
@@ -50,7 +65,7 @@ export function useMovies() {
     }
   };
 
-  const getRandomMovie = async (mediaType) => {
+  const getRandomMovie = async (mediaType: "movie" | "tv" = "movie"): Promise<Movie[]> => {
     setLoading(true);
     try {
       const isKidsProfile = profile?.is_kids || false;
@@ -60,6 +75,7 @@ export function useMovies() {
         setMovies(movies);
         return movies;
       }
+      return [];
     } catch (error) {
       console.error("Error getting random movie:", error);
       throw error;

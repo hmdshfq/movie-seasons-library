@@ -7,8 +7,8 @@
  * - At least one number
  * - At least one special character
  */
-export const validatePassword = (password) => {
-  const errors = [];
+export const validatePassword = (password: string): { isValid: boolean; errors: string[] } => {
+  const errors: string[] = [];
 
   if (!password || password.length < 8) {
     errors.push('Password must be at least 8 characters long');
@@ -39,7 +39,7 @@ export const validatePassword = (password) => {
 /**
  * Validates email format
  */
-export const validateEmail = (email) => {
+export const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
@@ -47,7 +47,8 @@ export const validateEmail = (email) => {
 /**
  * Sanitizes user input to prevent injection attacks
  */
-export const sanitizeInput = (input) => {
-  if (typeof input !== 'string') return input;
+export const sanitizeInput = (input: unknown): string => {
+  if (typeof input !== 'string') return String(input);
   return input.trim().substring(0, 500); // Limit length and trim
 };
+

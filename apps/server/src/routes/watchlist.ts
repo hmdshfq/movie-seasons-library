@@ -17,3 +17,4 @@ router.delete('/:movieId', removeFromWatchlist);
 router.get('/:movieId/check', isInWatchlist);
 
 export default router;
+

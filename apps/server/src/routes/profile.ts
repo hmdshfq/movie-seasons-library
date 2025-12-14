@@ -27,3 +27,4 @@ router.put('/preferences', updatePreferences);
 router.get('/stats', getMovieStats);
 
 export default router;
+

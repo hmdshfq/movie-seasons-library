@@ -1,7 +1,14 @@
+import { Response } from 'express';
 import { query } from '../db.js';
+import { AuthRequest } from '../middleware/auth.js';
 
-export const getProfile = async (req, res) => {
+export const getProfile = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (!req.userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const result = await query(
       'SELECT p.* FROM profiles p JOIN users u ON p.user_id = u.id WHERE u.id = $1',
       [req.userId]
@@ -13,8 +20,13 @@ export const getProfile = async (req, res) => {
   }
 };
 
-export const updateProfile = async (req, res) => {
+export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (!req.userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const { name, avatar_url, is_kids } = req.body;
 
     const profileResult = await query(
@@ -23,7 +35,8 @@ export const updateProfile = async (req, res) => {
     );
 
     if (profileResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Profile not found' });
+      res.status(404).json({ error: 'Profile not found' });
+      return;
     }
 
     const profileId = profileResult.rows[0].id;
@@ -46,8 +59,13 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-export const getWatchedMovies = async (req, res) => {
+export const getWatchedMovies = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (!req.userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const { order = 'desc', limit = 100, offset = 0 } = req.query;
 
     const profileResult = await query(
@@ -56,7 +74,8 @@ export const getWatchedMovies = async (req, res) => {
     );
 
     if (profileResult.rows.length === 0) {
-      return res.json([]);
+      res.json([]);
+      return;
     }
 
     const result = await query(
@@ -74,12 +93,18 @@ export const getWatchedMovies = async (req, res) => {
   }
 };
 
-export const addWatchedMovie = async (req, res) => {
+export const addWatchedMovie = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (!req.userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const { movie_id, title, poster_path, rating } = req.body;
 
     if (!movie_id) {
-      return res.status(400).json({ error: 'movie_id required' });
+      res.status(400).json({ error: 'movie_id required' });
+      return;
     }
 
     const profileResult = await query(
@@ -88,7 +113,8 @@ export const addWatchedMovie = async (req, res) => {
     );
 
     if (profileResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Profile not found' });
+      res.status(404).json({ error: 'Profile not found' });
+      return;
     }
 
     const result = await query(
@@ -110,8 +136,13 @@ export const addWatchedMovie = async (req, res) => {
   }
 };
 
-export const removeWatchedMovie = async (req, res) => {
+export const removeWatchedMovie = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (!req.userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const { movieId } = req.params;
 
     const profileResult = await query(
@@ -120,7 +151,8 @@ export const removeWatchedMovie = async (req, res) => {
     );
 
     if (profileResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Profile not found' });
+      res.status(404).json({ error: 'Profile not found' });
+      return;
     }
 
     await query(
@@ -135,15 +167,21 @@ export const removeWatchedMovie = async (req, res) => {
   }
 };
 
-export const getPreferences = async (req, res) => {
+export const getPreferences = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (!req.userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const profileResult = await query(
       'SELECT id FROM profiles WHERE user_id = $1',
       [req.userId]
     );
 
     if (profileResult.rows.length === 0) {
-      return res.json({});
+      res.json({});
+      return;
     }
 
     const result = await query(
@@ -158,8 +196,13 @@ export const getPreferences = async (req, res) => {
   }
 };
 
-export const updatePreferences = async (req, res) => {
+export const updatePreferences = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (!req.userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const { favorite_genres, language, hide_horror } = req.body;
 
     const profileResult = await query(
@@ -168,7 +211,8 @@ export const updatePreferences = async (req, res) => {
     );
 
     if (profileResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Profile not found' });
+      res.status(404).json({ error: 'Profile not found' });
+      return;
     }
 
     const result = await query(
@@ -189,13 +233,19 @@ export const updatePreferences = async (req, res) => {
   }
 };
 
-export const updateMovieRating = async (req, res) => {
+export const updateMovieRating = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (!req.userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const { movieId } = req.params;
     const { rating } = req.body;
 
     if (!rating || rating < 1 || rating > 5) {
-      return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+      res.status(400).json({ error: 'Rating must be between 1 and 5' });
+      return;
     }
 
     const profileResult = await query(
@@ -204,7 +254,8 @@ export const updateMovieRating = async (req, res) => {
     );
 
     if (profileResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Profile not found' });
+      res.status(404).json({ error: 'Profile not found' });
+      return;
     }
 
     const result = await query(
@@ -217,7 +268,8 @@ export const updateMovieRating = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Movie not found in watched list' });
+      res.status(404).json({ error: 'Movie not found in watched list' });
+      return;
     }
 
     res.json(result.rows[0]);
@@ -227,20 +279,26 @@ export const updateMovieRating = async (req, res) => {
   }
 };
 
-export const getMovieStats = async (req, res) => {
+export const getMovieStats = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (!req.userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const profileResult = await query(
       'SELECT id FROM profiles WHERE user_id = $1',
       [req.userId]
     );
 
     if (profileResult.rows.length === 0) {
-      return res.json({
+      res.json({
         totalWatched: 0,
         averageRating: 0,
         watchedThisMonth: 0,
         watchedThisYear: 0
       });
+      return;
     }
 
     const result = await query(
@@ -261,12 +319,12 @@ export const getMovieStats = async (req, res) => {
     };
 
     if (data.length > 0) {
-      const ratedMovies = data.filter(m => m.rating);
+      const ratedMovies = data.filter((m: { rating?: number }) => m.rating);
       if (ratedMovies.length > 0) {
-        stats.averageRating = ratedMovies.reduce((sum, m) => sum + m.rating, 0) / ratedMovies.length;
+        stats.averageRating = ratedMovies.reduce((sum: number, m: { rating: number }) => sum + m.rating, 0) / ratedMovies.length;
       }
 
-      data.forEach(movie => {
+      data.forEach((movie: { watched_at: string | Date }) => {
         const watchedDate = new Date(movie.watched_at);
         if (watchedDate.getFullYear() === thisYear) {
           stats.watchedThisYear++;
@@ -283,3 +341,4 @@ export const getMovieStats = async (req, res) => {
     res.status(500).json({ error: 'Failed to get stats' });
   }
 };
+

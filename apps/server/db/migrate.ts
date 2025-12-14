@@ -14,14 +14,14 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-async function migrate() {
+async function migrate(): Promise<void> {
   const client = await pool.connect();
   try {
     const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf-8');
     await client.query(schema);
     console.log('✓ Database migration completed successfully');
   } catch (error) {
-    console.error('✗ Migration failed:', error.message);
+    console.error('✗ Migration failed:', error instanceof Error ? error.message : String(error));
     process.exit(1);
   } finally {
     client.release();
@@ -30,3 +30,4 @@ async function migrate() {
 }
 
 migrate();
+

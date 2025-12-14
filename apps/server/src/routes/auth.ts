@@ -19,3 +19,4 @@ router.put('/update', authenticateToken, updateUser);
 router.post('/logout', authenticateToken, logout);
 
 export default router;
+

@@ -1,7 +1,14 @@
+import { Response } from 'express';
 import { query } from '../db.js';
+import { AuthRequest } from '../middleware/auth.js';
 
-export const getWatchlist = async (req, res) => {
+export const getWatchlist = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (!req.userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const { media_type } = req.query;
 
     const profileResult = await query(
@@ -10,11 +17,12 @@ export const getWatchlist = async (req, res) => {
     );
 
     if (profileResult.rows.length === 0) {
-      return res.json([]);
+      res.json([]);
+      return;
     }
 
     let sql = 'SELECT * FROM watchlist WHERE profile_id = $1';
-    const params = [profileResult.rows[0].id];
+    const params: unknown[] = [profileResult.rows[0].id];
 
     if (media_type) {
       sql += ' AND media_type = $2';
@@ -31,12 +39,18 @@ export const getWatchlist = async (req, res) => {
   }
 };
 
-export const addToWatchlist = async (req, res) => {
+export const addToWatchlist = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (!req.userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const { movie_id, media_type = 'movie', title, poster_path } = req.body;
 
     if (!movie_id) {
-      return res.status(400).json({ error: 'movie_id required' });
+      res.status(400).json({ error: 'movie_id required' });
+      return;
     }
 
     const profileResult = await query(
@@ -45,7 +59,8 @@ export const addToWatchlist = async (req, res) => {
     );
 
     if (profileResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Profile not found' });
+      res.status(404).json({ error: 'Profile not found' });
+      return;
     }
 
     const result = await query(
@@ -66,8 +81,13 @@ export const addToWatchlist = async (req, res) => {
   }
 };
 
-export const removeFromWatchlist = async (req, res) => {
+export const removeFromWatchlist = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (!req.userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const { movieId } = req.params;
     const { media_type = 'movie' } = req.query;
 
@@ -77,7 +97,8 @@ export const removeFromWatchlist = async (req, res) => {
     );
 
     if (profileResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Profile not found' });
+      res.status(404).json({ error: 'Profile not found' });
+      return;
     }
 
     await query(
@@ -92,8 +113,13 @@ export const removeFromWatchlist = async (req, res) => {
   }
 };
 
-export const isInWatchlist = async (req, res) => {
+export const isInWatchlist = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (!req.userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const { movieId } = req.params;
     const { media_type = 'movie' } = req.query;
 
@@ -103,7 +129,8 @@ export const isInWatchlist = async (req, res) => {
     );
 
     if (profileResult.rows.length === 0) {
-      return res.json({ inWatchlist: false });
+      res.json({ inWatchlist: false });
+      return;
     }
 
     const result = await query(
@@ -117,3 +144,4 @@ export const isInWatchlist = async (req, res) => {
     res.status(500).json({ error: 'Failed to check watchlist' });
   }
 };
+

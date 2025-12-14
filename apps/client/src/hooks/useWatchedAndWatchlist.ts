@@ -1,15 +1,18 @@
-import { useContext } from "react";
-import { useAuth } from "../contexts/AuthContext";
+import { useContext, useEffect, useState } from "react";
+import { useAuth } from "./useAuth";
 import { movieService } from "../services/movie.service";
 import { WatchlistContext } from "../contexts/WatchlistContext";
 
-// Returns { watched, loading }
-import { useEffect, useState } from "react";
+interface WatchedMovie {
+  id: number;
+  movie_id: number;
+  [key: string]: unknown;
+}
 
 export function useWatchedAndWatchlist() {
   const { profile } = useAuth();
   const { watchlist } = useContext(WatchlistContext);
-  const [watched, setWatched] = useState([]);
+  const [watched, setWatched] = useState<WatchedMovie[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -19,7 +22,7 @@ export function useWatchedAndWatchlist() {
     }
     setLoading(true);
     movieService.getWatchedMovies()
-      .then((data) => setWatched(data))
+      .then((data) => setWatched(data as WatchedMovie[]))
       .catch(() => setWatched([]))
       .finally(() => setLoading(false));
   }, [profile]);

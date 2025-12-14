@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
@@ -22,7 +22,7 @@ const allowedOrigins = [
   'http://localhost:3000',
   'https://mose.up.railway.app',
   process.env.CLIENT_URL
-].filter(Boolean);
+].filter(Boolean) as string[];
 
 console.log(`The client URL is ${process.env.CLIENT_URL} and port is ${PORT}`);
 
@@ -48,7 +48,7 @@ app.use('/api/watchlist', watchlistRoutes);
 app.use('/api/tmdb', tmdbRoutes);
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok' });
 });
 
@@ -58,8 +58,8 @@ console.log('Serving frontend from:', frontendPath);
 app.use(express.static(frontendPath));
 
 // SPA fallback - serve index.html for all non-API routes
-app.use((req, res, next) => {
-  res.sendFile(path.join(frontendPath, 'index.html'), (err) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.sendFile(path.join(frontendPath, 'index.html'), (err: Error | null) => {
     if (err) {
       next(err);
     }
@@ -67,7 +67,7 @@ app.use((req, res, next) => {
 });
 
 // Error handler (must be last)
-app.use((err, req, res, next) => {
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err);
   res.status(500).json({ error: 'Internal server error' });
 });
@@ -75,3 +75,4 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+

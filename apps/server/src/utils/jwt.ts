@@ -12,17 +12,24 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRY = process.env.JWT_EXPIRY || '15m'; // Short-lived access token
 const REFRESH_TOKEN_EXPIRY = process.env.REFRESH_TOKEN_EXPIRY || '7d';
 
-export const generateToken = (userId) => {
+interface TokenPayload {
+  userId: number;
+  type: 'access' | 'refresh';
+  iat?: number;
+  exp?: number;
+}
+
+export const generateToken = (userId: number): string => {
   return jwt.sign({ userId, type: 'access' }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
 };
 
-export const generateRefreshToken = (userId) => {
+export const generateRefreshToken = (userId: number): string => {
   return jwt.sign({ userId, type: 'refresh' }, JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 };
 
-export const verifyToken = (token) => {
+export const verifyToken = (token: string): TokenPayload | null => {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
     if (decoded.type !== 'access') {
       return null;
     }
@@ -32,9 +39,9 @@ export const verifyToken = (token) => {
   }
 };
 
-export const verifyRefreshToken = (token) => {
+export const verifyRefreshToken = (token: string): TokenPayload | null => {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
     if (decoded.type !== 'refresh') {
       return null;
     }
@@ -44,10 +51,11 @@ export const verifyRefreshToken = (token) => {
   }
 };
 
-export const decodeToken = (token) => {
+export const decodeToken = (token: string): TokenPayload | null => {
   try {
-    return jwt.decode(token);
+    return jwt.decode(token) as TokenPayload;
   } catch (error) {
     return null;
   }
 };
+

@@ -4,7 +4,7 @@ import { profileService } from '../services/profile.service';
 
 export function useProfile() {
   const { profile, profiles, switchProfile } = useAuth();
-  const [preferences, setPreferences] = useState(null);
+  const [preferences, setPreferences] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -13,10 +13,10 @@ export function useProfile() {
     }
   }, [profile]);
 
-  const fetchPreferences = async () => {
+  const fetchPreferences = async (): Promise<void> => {
     setLoading(true);
     try {
-      const prefs = await profileService.getPreferences();
+      const prefs = await profileService.getPreferences() as Record<string, unknown>;
       setPreferences(prefs);
     } catch (error) {
       console.error('Error fetching preferences:', error);
@@ -25,10 +25,10 @@ export function useProfile() {
     }
   };
 
-  const updatePreferences = async (newPreferences) => {
+  const updatePreferences = async (newPreferences: Record<string, unknown>): Promise<Record<string, unknown>> => {
     setLoading(true);
     try {
-      const updated = await profileService.updatePreferences(newPreferences);
+      const updated = await profileService.updatePreferences(newPreferences) as Record<string, unknown>;
       setPreferences(updated);
       return updated;
     } catch (error) {

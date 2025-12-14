@@ -1,10 +1,12 @@
+import { Response } from 'express';
 import bcrypt from 'bcrypt';
 import { query } from '../db.js';
 import { generateToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
 import { validatePassword, validateEmail, sanitizeInput } from '../utils/validators.js';
 import { addTokenToBlacklist } from '../middleware/tokenBlacklist.js';
+import { AuthRequest } from '../middleware/auth.js';
 
-const setTokenCookies = (res, accessToken, refreshToken) => {
+const setTokenCookies = (res: Response, accessToken: string, refreshToken: string): void => {
   // Set access token as HttpOnly cookie (15 minutes)
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
@@ -22,35 +24,39 @@ const setTokenCookies = (res, accessToken, refreshToken) => {
   });
 };
 
-export const register = async (req, res) => {
+export const register = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { email, password, name } = req.body;
 
     // Input validation
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password required' });
+      res.status(400).json({ error: 'Email and password required' });
+      return;
     }
 
     const sanitizedEmail = sanitizeInput(email).toLowerCase();
     const sanitizedName = sanitizeInput(name || '');
 
     if (!validateEmail(sanitizedEmail)) {
-      return res.status(400).json({ error: 'Invalid email format' });
+      res.status(400).json({ error: 'Invalid email format' });
+      return;
     }
 
     // Validate password strength
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
-      return res.status(400).json({ 
+      res.status(400).json({ 
         error: 'Password does not meet requirements',
         requirements: passwordValidation.errors 
       });
+      return;
     }
 
     // Check if user exists
     const userExists = await query('SELECT id FROM users WHERE email = $1', [sanitizedEmail]);
     if (userExists.rows.length > 0) {
-      return res.status(409).json({ error: 'Email already registered' });
+      res.status(409).json({ error: 'Email already registered' });
+      return;
     }
 
     // Hash password with salt rounds 12 for better security
@@ -93,12 +99,13 @@ export const register = async (req, res) => {
   }
 };
 
-export const login = async (req, res) => {
+export const login = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password required' });
+      res.status(400).json({ error: 'Email and password required' });
+      return;
     }
 
     const sanitizedEmail = sanitizeInput(email).toLowerCase();
@@ -110,14 +117,16 @@ export const login = async (req, res) => {
 
     if (userResult.rows.length === 0) {
       // Generic message prevents email enumeration
-      return res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ error: 'Invalid credentials' });
+      return;
     }
 
     const user = userResult.rows[0];
     const validPassword = await bcrypt.compare(password, user.password_hash);
 
     if (!validPassword) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ error: 'Invalid credentials' });
+      return;
     }
 
     const accessToken = generateToken(user.id);
@@ -137,17 +146,19 @@ export const login = async (req, res) => {
   }
 };
 
-export const refreshAccessToken = async (req, res) => {
+export const refreshAccessToken = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     let refreshToken = req.cookies?.refreshToken;
 
     if (!refreshToken) {
-      return res.status(401).json({ error: 'No refresh token provided' });
+      res.status(401).json({ error: 'No refresh token provided' });
+      return;
     }
 
     const decoded = verifyRefreshToken(refreshToken);
     if (!decoded) {
-      return res.status(403).json({ error: 'Invalid or expired refresh token' });
+      res.status(403).json({ error: 'Invalid or expired refresh token' });
+      return;
     }
 
     const newAccessToken = generateToken(decoded.userId);
@@ -167,15 +178,21 @@ export const refreshAccessToken = async (req, res) => {
   }
 };
 
-export const getSession = async (req, res) => {
+export const getSession = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (!req.userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const userResult = await query(
       'SELECT id, email FROM users WHERE id = $1',
       [req.userId]
     );
 
     if (userResult.rows.length === 0) {
-      return res.status(404).json({ error: 'User not found' });
+      res.status(404).json({ error: 'User not found' });
+      return;
     }
 
     const user = userResult.rows[0];
@@ -197,8 +214,13 @@ export const getSession = async (req, res) => {
   }
 };
 
-export const updateUser = async (req, res) => {
+export const updateUser = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (!req.userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
     const { email, password } = req.body;
     const userId = req.userId;
 
@@ -206,7 +228,8 @@ export const updateUser = async (req, res) => {
       const sanitizedEmail = sanitizeInput(email).toLowerCase();
 
       if (!validateEmail(sanitizedEmail)) {
-        return res.status(400).json({ error: 'Invalid email format' });
+        res.status(400).json({ error: 'Invalid email format' });
+        return;
       }
 
       // Check if email is already taken
@@ -215,7 +238,8 @@ export const updateUser = async (req, res) => {
         [sanitizedEmail, userId]
       );
       if (existing.rows.length > 0) {
-        return res.status(409).json({ error: 'Email already in use' });
+        res.status(409).json({ error: 'Email already in use' });
+        return;
       }
 
       await query('UPDATE users SET email = $1, updated_at = NOW() WHERE id = $2', [sanitizedEmail, userId]);
@@ -224,10 +248,11 @@ export const updateUser = async (req, res) => {
     if (password) {
       const passwordValidation = validatePassword(password);
       if (!passwordValidation.isValid) {
-        return res.status(400).json({ 
+        res.status(400).json({ 
           error: 'Password does not meet requirements',
           requirements: passwordValidation.errors 
         });
+        return;
       }
 
       const passwordHash = await bcrypt.hash(password, 12);
@@ -242,7 +267,7 @@ export const updateUser = async (req, res) => {
   }
 };
 
-export const logout = async (req, res) => {
+export const logout = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     // Add current token to blacklist
     if (req.token) {
@@ -260,25 +285,28 @@ export const logout = async (req, res) => {
   }
 };
 
-export const resetPassword = async (req, res) => {
+export const resetPassword = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { email } = req.body;
 
     if (!email) {
-      return res.status(400).json({ error: 'Email required' });
+      res.status(400).json({ error: 'Email required' });
+      return;
     }
 
     const sanitizedEmail = sanitizeInput(email).toLowerCase();
 
     if (!validateEmail(sanitizedEmail)) {
-      return res.status(400).json({ error: 'Invalid email format' });
+      res.status(400).json({ error: 'Invalid email format' });
+      return;
     }
 
     const userResult = await query('SELECT id FROM users WHERE email = $1', [sanitizedEmail]);
 
     if (userResult.rows.length === 0) {
       // For security, don't reveal if email exists
-      return res.json({ message: 'If account exists, password reset link sent' });
+      res.json({ message: 'If account exists, password reset link sent' });
+      return;
     }
 
     // TODO: Implement password reset token generation and email sending
@@ -289,3 +317,4 @@ export const resetPassword = async (req, res) => {
     res.status(500).json({ error: 'Password reset failed' });
   }
 };
+
