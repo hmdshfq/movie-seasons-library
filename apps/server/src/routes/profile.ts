@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Router } from 'express';
 import {
   getProfile,
   updateProfile,
@@ -12,7 +12,7 @@ import {
 } from '../controllers/profile.js';
 import { authenticateToken } from '../middleware/auth.js';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 router.use(authenticateToken);
 

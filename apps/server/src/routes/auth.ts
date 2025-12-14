@@ -1,9 +1,9 @@
-import express from 'express';
+import express, { Router } from 'express';
 import { register, login, getSession, updateUser, resetPassword, logout, refreshAccessToken } from '../controllers/auth.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { rateLimiters } from '../middleware/rateLimiter.js';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // Public routes with rate limiting
 router.post('/register', rateLimiters.register, register);
