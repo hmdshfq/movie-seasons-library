@@ -45,7 +45,7 @@ export default function LoginForm() {
           </label>
           <div className="relative">
             <Mail
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-100"
               size={20}
             />
             <input
@@ -53,7 +53,7 @@ export default function LoginForm() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-slate-700 rounded-lg border-2 border-transparent focus:border-indigo-500 focus:outline-none transition-all"
+              className="w-full pl-10 pr-4 py-3 text-gray-100 bg-slate-700 rounded-lg border-2 border-transparent focus:border-indigo-500 focus:outline-none transition-all"
               placeholder="you@example.com"
               required
               aria-label="Email address"
@@ -69,7 +69,7 @@ export default function LoginForm() {
           </label>
           <div className="relative">
             <Lock
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-100"
               size={20}
             />
             <input
@@ -77,7 +77,7 @@ export default function LoginForm() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-slate-700 rounded-lg border-2 border-transparent focus:border-indigo-500 focus:outline-none transition-all"
+              className="w-full pl-10 pr-4 py-3 text-gray-100 bg-slate-700 rounded-lg border-2 border-transparent focus:border-indigo-500 focus:outline-none transition-all"
               placeholder="••••••••"
               required
               aria-label="Password"
@@ -89,7 +89,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white py-3 rounded-lg font-semibold hover:from-indigo-700 hover:to-indigo-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+        className="w-full bg-linear-to-r from-indigo-600 to-indigo-700 text-white py-3 rounded-lg font-semibold hover:from-indigo-700 hover:to-indigo-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
         {loading ? "Signing in..." : "Sign In"}
       </button>
 
